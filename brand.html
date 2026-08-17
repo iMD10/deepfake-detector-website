@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brand harness — FakeReasoning detector</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500&family=IBM+Plex+Sans:wght@400;450;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0B0B0B;
+  --surface:#141414;
+  --surface-2:#1C1C1C;
+  --line:#282828;
+  --line-2:#3A3A3A;
+  --text:#EDEDED;
+  --muted:#8A8A8A;
+  --dim:#5E5E5E;
+  --signal:#4EA8B8;
+
+  --font-display:"Pixelify Sans","Courier New",monospace;
+  --font-sans:"IBM Plex Sans",system-ui,sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,monospace;
+
+  --t-hero:clamp(30px,6.4vw,68px);
+  --t-verdict:clamp(19px,2.4vw,25px);
+  --t-body:16px;
+  --t-label:11px;
+
+  --ease:cubic-bezier(0.22,1,0.36,1);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:var(--font-sans);font-size:var(--t-body);line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1080px;margin:0 auto;padding:0 clamp(16px,4vw,40px)}
+.rule{height:1px;background:var(--line);border:0;margin:0}
+
+.lbl{
+  font-family:var(--font-mono);font-size:var(--t-label);
+  letter-spacing:.08em;color:var(--dim);text-transform:uppercase;
+}
+.note{
+  font-family:var(--font-mono);font-size:11px;line-height:1.6;
+  color:var(--dim);background:var(--surface);
+  border-left:2px solid var(--line-2);padding:8px 12px;margin:14px 0 0;
+}
+
+/* ---------- nav ---------- */
+.nav{display:flex;align-items:center;gap:20px;padding:18px 0}
+.mark{
+  width:38px;height:38px;border-radius:50%;
+  background:var(--text);color:var(--bg);
+  display:grid;place-items:center;flex:0 0 auto;
+  font-family:var(--font-display);font-size:15px;letter-spacing:-.02em;
+}
+.nav-links{display:flex;gap:22px;margin-left:auto;flex-wrap:wrap}
+.nav-links a{
+  font-family:var(--font-mono);font-size:12px;letter-spacing:.04em;
+  color:var(--muted);text-decoration:none;padding:4px 0;
+}
+.nav-links a[aria-current]{color:var(--text);border-bottom:1px solid var(--text)}
+.nav-links a:hover{color:var(--text)}
+.nav-links a:focus-visible{outline:2px solid var(--signal);outline-offset:3px}
+
+/* ---------- hero ---------- */
+.hero{padding:clamp(34px,7vh,74px) 0 clamp(26px,5vh,44px)}
+.hero h1{
+  font-family:var(--font-display);font-weight:400;
+  font-size:var(--t-hero);line-height:1.06;letter-spacing:-.02em;
+  margin:0 0 22px;color:var(--text);
+}
+.hero h1 span{display:block}
+.hero p{
+  max-width:60ch;margin:0 0 26px;color:var(--muted);
+  font-size:clamp(15px,1.5vw,17px);line-height:1.62;
+}
+.actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.btn{
+  font-family:var(--font-mono);font-size:13px;letter-spacing:.02em;
+  background:var(--text);color:var(--bg);border:1px solid var(--text);
+  padding:11px 20px;border-radius:2px;cursor:pointer;
+  transition:background .18s var(--ease),color .18s var(--ease);
+}
+.btn:hover{background:#fff}
+.btn-ghost{background:transparent;color:var(--muted);border-color:var(--line-2)}
+.btn-ghost:hover{background:transparent;color:var(--text);border-color:var(--text)}
+.btn:focus-visible{outline:2px solid var(--signal);outline-offset:3px}
+
+/* ---------- exhibit + transcript ---------- */
+.panel{
+  display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);
+  gap:clamp(18px,3vw,34px);
+  background:var(--surface);border:1px solid var(--line);
+  padding:clamp(16px,2.6vw,26px);margin:26px 0 0;
+}
+.exhibit{
+  aspect-ratio:1;background:var(--surface-2);
+  border:1px solid var(--line-2);
+  display:grid;place-items:center;
+}
+.exhibit span{font-family:var(--font-mono);font-size:11px;color:var(--dim)}
+.exhibit-meta{
+  font-family:var(--font-mono);font-size:11px;color:var(--dim);
+  margin-top:8px;line-height:1.7;
+}
+.blocks{min-width:0}
+.blk{
+  display:grid;grid-template-columns:88px minmax(0,1fr);gap:16px;
+  padding:10px 0;border-top:1px solid var(--line);
+}
+.blk:first-child{border-top:0;padding-top:0}
+.blk p{margin:0;color:var(--text);font-size:15px;line-height:1.6}
+.blk.reasoning p{color:var(--muted)}
+.blk .lbl{padding-top:3px}
+
+/* the signature element: the slot is visible and empty from the start */
+.slot{
+  margin-top:14px;border-top:1px solid var(--line);padding-top:14px;
+  display:grid;grid-template-columns:88px minmax(0,1fr);gap:16px;
+}
+.slot-box{
+  min-height:56px;border:1px dashed var(--line-2);
+  display:flex;align-items:center;padding:0 14px;
+  font-family:var(--font-mono);font-size:12px;color:var(--dim);
+}
+.slot-box.filled{
+  border:1px solid var(--text);border-left:3px solid var(--text);
+  font-family:var(--font-sans);font-size:var(--t-verdict);
+  color:var(--text);letter-spacing:-.01em;
+  animation:settle .5s var(--ease) both;
+}
+.slot-box.filled.weak{
+  border:1px dashed var(--line-2);border-left:3px solid var(--muted);
+  color:var(--muted);
+}
+@keyframes settle{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.caveat{
+  font-family:var(--font-mono);font-size:11px;color:var(--dim);
+  margin:8px 0 0;line-height:1.6;
+}
+
+/* ---------- mosaic ---------- */
+.mosaic{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:2px;margin-top:14px}
+.tile{
+  aspect-ratio:1;background:var(--surface-2);border:1px solid var(--line);
+  padding:7px;display:flex;flex-direction:column;justify-content:flex-end;
+  font-family:var(--font-mono);font-size:10px;color:var(--dim);line-height:1.4;
+}
+.tile b{color:var(--muted);font-weight:400;display:block}
+.tile.miss{border-color:var(--line-2)}
+.tile.miss b{color:var(--text)}
+
+/* ---------- metrics ---------- */
+.metrics{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:clamp(12px,2vw,24px);padding:26px 0 34px;
+}
+.metric .glyph{font-family:var(--font-display);font-size:26px;color:var(--text);line-height:1}
+.metric .val{
+  font-family:var(--font-sans);font-weight:450;
+  font-size:clamp(19px,2.2vw,26px);letter-spacing:-.025em;
+  font-variant-numeric:tabular-nums;margin:8px 0 3px;
+}
+.metric .cap{font-size:12.5px;color:var(--muted);line-height:1.45}
+
+/* ---------- token docs ---------- */
+.tokens{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-top:14px}
+.tok{font-family:var(--font-mono);font-size:11px;color:var(--muted)}
+.sw{display:block;height:44px;border:1px solid var(--line);margin-bottom:6px}
+.spec{font-family:var(--font-mono);font-size:12px;color:var(--muted);line-height:1.9;margin:14px 0 0}
+.spec b{color:var(--text);font-weight:500}
+section{padding:34px 0}
+h2.sec{font-family:var(--font-mono);font-size:12px;letter-spacing:.1em;color:var(--dim);text-transform:uppercase;font-weight:400;margin:0 0 14px}
+
+@media(max-width:720px){
+  .panel{grid-template-columns:1fr}
+  .metrics{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:22px}
+  .blk,.slot{grid-template-columns:1fr;gap:5px}
+  .nav-links{gap:14px}
+  :root{--t-hero:clamp(27px,8.4vw,40px)}
+}
+@media(prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <nav class="nav">
+    <div class="mark">FR</div>
+    <div class="nav-links">
+      <a href="#" aria-current="page">Detector</a>
+      <a href="#">Method</a>
+      <a href="#">Results</a>
+      <a href="#">Paper</a>
+    </div>
+  </nav>
+  <hr class="rule">
+
+  <div class="hero">
+    <h1><span>Detectors output</span><span>a score. This one</span><span>outputs an argument.</span></h1>
+    <p>A score of 0.83 tells an editor nothing about what was wrong, so it gives them nothing to
+       check, cite, or appeal. This model answers with a caption of your image, the evidence it
+       found in it, and only then a verdict.</p>
+    <div class="actions">
+      <button class="btn" id="run">Analyse an image</button>
+      <button class="btn btn-ghost">Read the method</button>
+    </div>
+  </div>
+
+  <div class="metrics">
+    <div class="metric"><div class="glyph">%</div><div class="val">92.5%</div><div class="cap">Accuracy on ten unseen generators, unchanged by fine-tuning</div></div>
+    <div class="metric"><div class="glyph">+</div><div class="val">+0.520</div><div class="cap">Class separation, up from +0.274</div></div>
+    <div class="metric"><div class="glyph">#</div><div class="val">0.799%</div><div class="cap">Share of the model retrained</div></div>
+    <div class="metric"><div class="glyph">~</div><div class="val">23s</div><div class="cap">Mean seconds per image, warm</div></div>
+  </div>
+
+  <hr class="rule">
+
+  <section>
+    <h2 class="sec">Signature element — the empty verdict slot</h2>
+    <div class="panel">
+      <div>
+        <div class="exhibit"><span>exhibit</span></div>
+        <div class="exhibit-meta">1024 &times; 1024 &middot; jpeg &middot; 412 kb<br>official &middot; fp16 &middot; a100-40gb</div>
+      </div>
+      <div class="blocks">
+        <div class="blk"><span class="lbl">summary</span><p>A studio-lit portrait with pronounced background separation.</p></div>
+        <div class="blk"><span class="lbl">caption</span><p>A woman in a red coat against a blurred market street, shallow depth of field, warm evening light.</p></div>
+        <div class="blk reasoning"><span class="lbl">reasoning</span><p>Specular highlights in both irises fall in the same direction, but the catchlight shape does not
+          match the visible key light. Hair strands dissolve into the background rather than occluding it,
+          and the fabric weave loses periodicity where the coat meets the shoulder seam.</p></div>
+        <div class="slot">
+          <span class="lbl">conclusion</span>
+          <div>
+            <div class="slot-box" id="slot">awaiting the argument</div>
+            <p class="caveat" id="caveat">The slot stays empty until the reasoning finishes. Press &ldquo;analyse an image&rdquo; to fill it.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="note">Placeholder transcript, ~60 words. Real outputs run about 176 words, so this panel must be
+      re-checked against a real run before the tokens are locked.</p>
+  </section>
+
+  <hr class="rule">
+
+  <section>
+    <h2 class="sec">Hero medium — your own evaluation set, not stock video</h2>
+    <div class="mosaic">
+      <div class="tile"><b>DALL&middot;E 3</b>4/4</div>
+      <div class="tile"><b>GigaGAN</b>4/4</div>
+      <div class="tile"><b>GPT-4o</b>4/4</div>
+      <div class="tile"><b>DeepFloyd IF</b>4/4</div>
+      <div class="tile"><b>PixArt</b>4/4</div>
+      <div class="tile"><b>Stable Diffusion</b>4/4</div>
+      <div class="tile"><b>StyleGAN-XL</b>4/4</div>
+      <div class="tile miss"><b>Flux</b>3/4 &middot; one miss</div>
+      <div class="tile miss"><b>Kandinsky</b>3/4 &middot; one miss</div>
+      <div class="tile miss"><b>Midjourney</b>3/4 &middot; one miss</div>
+    </div>
+    <p class="note">Tiles carry real per-generator results from Table 5. Drop the forty evaluation images in as
+      webp; the three tiles it got wrong stay visible on purpose.</p>
+  </section>
+
+  <hr class="rule">
+
+  <section>
+    <h2 class="sec">Locked tokens</h2>
+    <div class="tokens">
+      <div class="tok"><span class="sw" style="background:#0B0B0B"></span>--bg #0B0B0B</div>
+      <div class="tok"><span class="sw" style="background:#141414"></span>--surface #141414</div>
+      <div class="tok"><span class="sw" style="background:#1C1C1C"></span>--surface-2 #1C1C1C</div>
+      <div class="tok"><span class="sw" style="background:#282828"></span>--line #282828</div>
+      <div class="tok"><span class="sw" style="background:#EDEDED"></span>--text #EDEDED</div>
+      <div class="tok"><span class="sw" style="background:#8A8A8A"></span>--muted #8A8A8A</div>
+      <div class="tok"><span class="sw" style="background:#5E5E5E"></span>--dim #5E5E5E</div>
+      <div class="tok"><span class="sw" style="background:#4EA8B8"></span>--signal #4EA8B8</div>
+    </div>
+    <p class="spec">
+      <b>Every grey is exactly neutral.</b> Zero saturation, on purpose: the chrome sits next to an image
+      being judged for lighting and colour artifacts, and a blue-black or warm-black surround casts onto it.<br>
+      <b>--signal #4EA8B8 is reserved.</b> Focus rings, and the DINOv2 attention overlay if you ship it.
+      It never touches a headline word.<br>
+      <b>Display</b> Pixelify Sans (OFL) — headline and the four metric glyphs only, never prose.<br>
+      <b>Sans</b> IBM Plex Sans 400 / 450 / 500 — the model's prose and all UI.<br>
+      <b>Mono</b> IBM Plex Mono 400 / 500 — block labels, metadata, buttons.<br>
+      <b>Scale</b> hero clamp(30&ndash;68) &middot; verdict clamp(19&ndash;25) &middot; body 16 &middot; label 11.<br>
+      <b>Radius</b> 2px on controls, 0 everywhere else. <b>Rules</b> 1px hairline, never a shadow.<br>
+      <b>Verdict weight is epistemic.</b> A fake verdict renders solid white and enclosed; a real verdict
+      renders dashed and muted, because measured fake recall is 51.7% against 100% real recall.
+    </p>
+  </section>
+
+</div>
+
+<script>
+(function(){
+  var slot=document.getElementById('slot'),
+      caveat=document.getElementById('caveat'),
+      btn=document.getElementById('run'),
+      fake=true;
+  btn.addEventListener('click',function(){
+    slot.className='slot-box filled'+(fake?'':' weak');
+    slot.textContent=fake?'This image is fake.':'This image is real.';
+    caveat.textContent=fake
+      ?'Verdict parsed from the last match of /this image is (real|fake)/. No confidence score is emitted.'
+      :'A real verdict is the weaker of the two: this model answers real 70% of the time and its fake recall is 51.7%.';
+    fake=!fake;
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Not a score. An argument. — AI image detection with a written verdict</title>
+<meta name="description" content="Two vision-language models read your photograph and each write what they found in it. 92.5% accuracy across ten unseen generators. KAUST Academy, 2026.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://db.onlinewebfonts.com/c/8cb707a9b8a73f8a7403336b861c3074?family=BubbledotICG-FinePos" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+  integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+  crossorigin="anonymous" referrerpolicy="no-referrer">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="bg">
+  <video class="bg-video" autoplay muted loop playsinline poster="assets/poster.webp">
+    <source
+      src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260809_012548_ef22562c-c0ae-4816-ad9d-f8922af4e6a7.mp4"
+      type="video/mp4"
+    />
+  </video>
+</div>
+
+<div class="page">
+
+  <header class="header">
+    <a class="logo" href="/" aria-label="Home">
+      <img src="assets/logo.webp" width="52" height="52" alt="">
+    </a>
+
+    <nav class="nav-pill" aria-label="Primary">
+      <a href="#" class="active" aria-current="page">Home</a>
+      <a href="#method">Method</a>
+      <a href="#results">Results</a>
+      <a href="#paper">Paper</a>
+    </nav>
+
+    <a class="signin" href="#paper">Read the paper</a>
+
+    <button class="burger" id="burger" aria-expanded="false" aria-controls="mobile-menu" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </header>
+
+  <main class="hero">
+
+    <div class="trust anim" style="--d:.05s">
+      <span class="avatars" aria-hidden="true">
+        <span class="av a1"><span class="av-in"><i class="fa-brands fa-github"></i></span></span>
+        <span class="av a2"><span class="av-in"><i class="fa-brands fa-python"></i></span></span>
+        <span class="av a3"><span class="av-in"><i class="fa-brands fa-docker"></i></span></span>
+      </span>
+      <span class="trust-pill">Fine-tuned on a single GPU &middot; KAUST Academy</span>
+    </div>
+
+    <h1 class="headline anim">
+      <span class="l1">Not a score.</span>
+      <span class="l2">An argument.</span>
+    </h1>
+
+    <p class="subhead anim" style="--d:.28s">
+      A score of 0.83 tells you nothing to check, cite, or appeal. Upload a photograph and two
+      models each write what they found in it.
+    </p>
+
+    <div class="cta-wrap anim" style="--d:.4s">
+      <button class="cta" id="analyse">Upload an image</button>
+      <button class="cta-alt" id="example">See a worked example</button>
+      <span class="cta-note">takes up to a minute</span>
+      <input type="file" id="file" accept="image/png,image/jpeg,image/webp" hidden>
+      <p class="cta-error" id="err" role="alert" hidden></p>
+    </div>
+
+    <div class="stages" id="stages" hidden aria-live="polite">
+      <p class="stages-head">Cold start &mdash; the models scale to zero after five idle minutes</p>
+      <ol>
+        <li data-s="boot"><i></i><span>Starting container</span><b></b></li>
+        <li data-s="load"><i></i><span>Loading 26.8&nbsp;GB of weights onto the GPU</span><b></b></li>
+        <li data-s="read"><i></i><span>CLIP and DINOv2 towers reading your image</span><b></b></li>
+        <li data-s="write"><i></i><span>Vicuna-13B writing its answer</span><b></b></li>
+      </ol>
+      <div class="stages-bar"><i id="bar"></i></div>
+    </div>
+
+  </main>
+
+  <footer class="stats">
+    <div class="stat" style="--d:.5s">
+      <div class="glyph">%</div>
+      <div class="val" data-target="92.5" data-suffix="%" data-dec="1">0%</div>
+      <div class="cap">Accuracy on ten unseen generators</div>
+    </div>
+    <div class="stat" style="--d:.58s">
+      <div class="glyph">+</div>
+      <div class="val" data-target="0.520" data-suffix="" data-dec="3">0.000</div>
+      <div class="cap">Class separation, from +0.274</div>
+    </div>
+    <div class="stat" style="--d:.66s">
+      <div class="glyph">#</div>
+      <div class="val" data-target="0.799" data-suffix="%" data-dec="3">0.000%</div>
+      <div class="cap">Share of the model retrained</div>
+    </div>
+    <div class="stat" style="--d:.74s">
+      <div class="glyph">~</div>
+      <div class="val" data-target="16" data-suffix="s" data-dec="0">0s</div>
+      <div class="cap">Warm inference per image</div>
+    </div>
+  </footer>
+
+</div>
+
+<div class="overlay" id="overlay" hidden></div>
+
+<div class="sheet" id="mobile-menu" hidden>
+  <nav aria-label="Mobile">
+    <a href="#" class="active" aria-current="page">Home</a>
+    <a href="#method">Method</a>
+    <a href="#results">Results</a>
+    <a href="#paper">Paper</a>
+    <a href="#paper" class="sheet-cta">Read the paper</a>
+  </nav>
+</div>
+
+<!-- light reading surface, opens over the video -->
+<section class="doc" id="doc" hidden aria-labelledby="doc-title">
+  <div class="doc-inner">
+
+    <div class="doc-bar">
+      <h2 id="doc-title">Two readings of one photograph</h2>
+      <button class="doc-close" id="doc-close" aria-label="Close">&times;</button>
+    </div>
+
+    <div class="doc-grid">
+      <div class="doc-exhibit">
+        <div class="mat"><img id="doc-img" alt="The image you submitted" src="" hidden><span id="doc-ph">exhibit</span></div>
+        <dl class="meta" id="doc-meta">
+          <dt>file</dt><dd>_smoke_test.png</dd>
+          <dt>size</dt><dd>1536 &times; 1024 &middot; PNG</dd>
+          <dt>run</dt><dd>17 Aug 2026</dd>
+        </dl>
+      </div>
+
+      <div class="doc-compare">
+
+        <article class="model" data-model="finetune">
+          <header>
+            <h3>Our fine-tune</h3>
+            <span class="ms">9.9s</span>
+          </header>
+          <div class="say" id="say-ft">
+            <p>The image depicts a modern building with large glass windows, surrounded by palm trees
+            and a clear sky. Despite its seemingly authentic appearance, certain features, such as
+            disproportionate textures or odd lighting, hint that this image was generated by AI.</p>
+          </div>
+          <p class="verdict"><b id="v-ft">Fake</b><span>greedy decoding &middot; reproducible</span></p>
+          <p class="caveat">A fake verdict is the stronger of the two. Measured fake recall is 51.7%
+            against 100% real recall, so this model misses fakes more often than it doubts photographs.</p>
+        </article>
+
+        <article class="model" data-model="official">
+          <header>
+            <h3>Original <span>(PRIS-CV)</span></h3>
+            <span class="ms">15.6s</span>
+          </header>
+          <div class="say" id="say-of">
+            <p><em class="half">low-level</em>The lighting on the building and the shadows on the objects
+            do not match the overall light source direction. The textures on the building and the
+            surrounding objects appear inconsistent and lack realistic detail.</p>
+            <p><em class="half">high-level</em>The text on the building and the icons are nonsensical
+            and do not form coherent words or symbols.</p>
+          </div>
+          <p class="verdict"><b id="v-of">Fake</b><span>sampled at t=0.2 &middot; wording varies</span></p>
+          <p class="caveat">This model runs with sampling on, the authors' published configuration. Ask it
+            twice about the same photograph and it will find different evidence both times.</p>
+        </article>
+
+      </div>
+    </div>
+
+    <p class="flag" id="flag" hidden>The model reached its 512-token limit and stopped mid-sentence.
+      What you see above is incomplete.</p>
+
+    <p class="doc-foot">No confidence score is produced, and none is shown &mdash; the verdict is parsed from
+      the model's own closing sentence, which is removed above so it is not stated twice. There is no
+      heatmap: this model's evidence is its prose.<br><br>
+      Built on <code>AnnaGao/FakeReasoning</code> by PRIS-CV. Our contribution is LoRA adapters on their
+      weights, 62.6M parameters, 0.799% of the model &mdash; not a model trained from scratch.
+      KAUST Academy, August 2026.</p>
+
+  </div>
+</section>
+
+<script src="main.js"></script>
+</body>
+</html>

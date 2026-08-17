@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brand harness — light — deepfake detector</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;1,8..60,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F7F8F8;
+  --card:#FFFFFF;
+  --mat:#E9EAEA;
+  --ink:#16191C;
+  --body:#3D4348;
+  --muted:#6E767C;
+  --line:#DDE0E2;
+  --accent:#00679E;
+  --accent-bright:#008BD2;
+  --flag:#B77800;
+  --flag-bg:#FFF8E8;
+
+  --sans:"Libre Franklin",system-ui,sans-serif;
+  --serif:"Source Serif 4",Georgia,serif;
+  --mono:"IBM Plex Mono",ui-monospace,monospace;
+
+  --ease:cubic-bezier(0.22,1,0.36,1);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background:var(--paper);color:var(--body);
+  font-family:var(--sans);font-size:16px;line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1000px;margin:0 auto;padding:0 clamp(18px,5vw,44px)}
+.lbl{font-family:var(--mono);font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.mono{font-family:var(--mono)}
+.sec{margin:0 0 20px;font-family:var(--mono);font-size:11px;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--muted);font-weight:400}
+.note{font-family:var(--mono);font-size:11px;line-height:1.7;color:var(--muted);
+  margin:16px 0 0;padding-left:12px;border-left:2px solid var(--line)}
+section{padding:clamp(38px,6vh,64px) 0}
+.divide{border:0;border-top:1px solid var(--line);margin:0}
+
+/* ---------- header ---------- */
+.nav{display:flex;align-items:center;gap:14px;padding:22px 0}
+.mark{width:34px;height:34px;border-radius:50%;background:var(--accent-bright);
+  display:grid;place-items:center;flex:0 0 auto}
+.mark svg{width:17px;height:17px}
+.wordmark{font-weight:600;font-size:15px;color:var(--ink);letter-spacing:-.01em}
+.wordmark em{font-style:normal;font-weight:400;color:var(--muted);font-size:12px;
+  display:block;letter-spacing:0;margin-top:1px}
+.nav-links{display:flex;gap:24px;margin-left:auto;align-items:center;flex-wrap:wrap}
+.nav-links a{font-size:14px;color:var(--muted);text-decoration:none}
+.nav-links a[aria-current]{color:var(--ink);font-weight:500}
+.nav-links a:hover{color:var(--accent)}
+.nav-links a:focus-visible,button:focus-visible{outline:2px solid var(--accent-bright);outline-offset:3px}
+
+/* ---------- hero ---------- */
+.hero{padding:clamp(44px,9vh,90px) 0 clamp(30px,5vh,52px)}
+h1{font-family:var(--sans);font-weight:600;color:var(--ink);
+  font-size:clamp(31px,5.1vw,54px);line-height:1.1;letter-spacing:-.028em;
+  margin:0 0 22px;max-width:19ch}
+.lede{font-size:clamp(16px,1.6vw,18px);line-height:1.6;color:var(--body);
+  max-width:56ch;margin:0 0 30px}
+.cta-row{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.btn{font-family:var(--sans);font-weight:500;font-size:15px;
+  background:var(--ink);color:#fff;border:1px solid var(--ink);
+  padding:12px 24px;border-radius:4px;cursor:pointer;
+  transition:background .18s var(--ease),transform .18s var(--ease)}
+.btn:hover{background:#000;transform:translateY(-1px)}
+.btn-ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn-ghost:hover{background:var(--card);border-color:var(--muted);transform:none}
+.wait-hint{font-family:var(--mono);font-size:12px;color:var(--muted)}
+
+/* ---------- metrics ---------- */
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(16px,3vw,36px)}
+.metric .v{font-weight:600;color:var(--ink);font-size:clamp(22px,2.6vw,31px);
+  letter-spacing:-.03em;font-variant-numeric:tabular-nums;line-height:1}
+.metric .c{font-size:13px;color:var(--muted);line-height:1.45;margin-top:9px}
+
+/* ---------- the wait ---------- */
+.console{background:var(--card);border:1px solid var(--line);border-radius:6px;
+  padding:clamp(18px,2.6vw,26px);max-width:560px}
+.stage{display:grid;grid-template-columns:18px 1fr auto;gap:12px;align-items:baseline;
+  padding:7px 0;font-family:var(--mono);font-size:13px;color:var(--muted)}
+.stage.done{color:var(--body)}
+.stage.now{color:var(--ink)}
+.stage .tick{color:var(--accent-bright)}
+.stage .t{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.bar{height:2px;background:var(--mat);margin-top:14px;overflow:hidden}
+.bar i{display:block;height:100%;width:62%;background:var(--accent-bright)}
+
+/* ---------- exhibit + comparison ---------- */
+.result{background:var(--card);border:1px solid var(--line);border-radius:6px;
+  padding:clamp(18px,3vw,32px)}
+.exhibit-row{display:grid;grid-template-columns:minmax(0,260px) minmax(0,1fr);
+  gap:clamp(20px,3.4vw,38px);align-items:start}
+.mat{background:var(--mat);padding:14px;border-radius:3px}
+.mat .img{aspect-ratio:3/2;background:#D2D4D5;display:grid;place-items:center;
+  font-family:var(--mono);font-size:11px;color:#8B9095}
+.exhibit-meta{font-family:var(--mono);font-size:11.5px;line-height:1.85;
+  color:var(--muted);margin-top:12px}
+.compare{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(20px,3vw,34px)}
+.col{min-width:0}
+.col-head{display:flex;align-items:baseline;gap:8px;padding-bottom:9px;
+  border-bottom:2px solid var(--ink);margin-bottom:16px}
+.col-head.alt{border-bottom-color:var(--line)}
+.col-head h3{margin:0;font-size:15px;font-weight:600;color:var(--ink);letter-spacing:-.01em}
+.col-head .t{margin-left:auto;font-family:var(--mono);font-size:11.5px;color:var(--muted);
+  font-variant-numeric:tabular-nums}
+.prose{font-family:var(--serif);font-size:16.5px;line-height:1.62;color:var(--ink);margin:0}
+.half{margin:0 0 12px}
+.half .lbl{display:block;margin-bottom:3px}
+.verdict{margin-top:18px;padding-top:14px;border-top:1px solid var(--line);
+  display:flex;align-items:center;gap:10px}
+.verdict .word{font-weight:600;font-size:19px;color:var(--ink);letter-spacing:-.015em}
+.verdict .word.real{font-weight:400;color:var(--muted)}
+.verdict .src{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.asym{font-family:var(--mono);font-size:11.5px;line-height:1.7;color:var(--muted);margin:10px 0 0}
+.flagline{font-family:var(--mono);font-size:12px;line-height:1.6;color:var(--flag);
+  background:var(--flag-bg);border:1px solid #F0DCA8;border-radius:4px;
+  padding:9px 12px;margin:16px 0 0}
+
+/* ---------- tokens ---------- */
+.tokens{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:16px}
+.tok{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.sw{display:block;height:46px;border:1px solid var(--line);border-radius:3px;margin-bottom:7px}
+.spec{font-family:var(--mono);font-size:12px;line-height:1.95;color:var(--muted);margin:22px 0 0}
+.spec b{color:var(--ink);font-weight:500}
+footer{padding:34px 0 56px;font-size:13px;color:var(--muted);line-height:1.7}
+footer a{color:var(--accent)}
+
+@media(max-width:760px){
+  .exhibit-row,.compare{grid-template-columns:1fr}
+  .metrics{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:26px}
+  h1{font-size:clamp(27px,7.6vw,36px)}
+  .nav-links{gap:16px}
+  .nav-links a{font-size:13px}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <nav class="nav">
+    <span class="mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.1" stroke-linecap="round">
+        <path d="M4 6h16M4 12h16M4 18h9"/>
+      </svg>
+    </span>
+    <span class="wordmark">Detector<em>KAUST Academy &middot; 2026</em></span>
+    <span class="nav-links">
+      <a href="#" aria-current="page">Analyse</a>
+      <a href="#">Method</a>
+      <a href="#">Results</a>
+      <a href="#">Paper</a>
+    </span>
+  </nav>
+
+  <div class="hero">
+    <h1>Detectors output a score. This one outputs an argument.</h1>
+    <p class="lede">A score of 0.83 tells an editor nothing about what was wrong, so it gives them
+      nothing to check, cite, or appeal. Upload a photograph and two models will each tell you, in
+      their own words, what they found in it.</p>
+    <div class="cta-row">
+      <button class="btn">Upload an image</button>
+      <button class="btn btn-ghost">See a worked example</button>
+      <span class="wait-hint">takes up to a minute</span>
+    </div>
+  </div>
+
+  <div class="metrics">
+    <div class="metric"><div class="v">92.5%</div><div class="c">Accuracy across ten unseen generators, unchanged by fine-tuning</div></div>
+    <div class="metric"><div class="v">+0.520</div><div class="c">Class separation, up from +0.274</div></div>
+    <div class="metric"><div class="v">0.799%</div><div class="c">Share of the model retrained</div></div>
+    <div class="metric"><div class="v">2</div><div class="c">Models answering the same photograph</div></div>
+  </div>
+</div>
+
+<section><div class="wrap">
+  <h2 class="sec">Signature element &mdash; the wait is the demonstration</h2>
+  <div class="console">
+    <div class="stage done"><span class="tick">&check;</span><span>container started</span><span class="t">1.2s</span></div>
+    <div class="stage done"><span class="tick">&check;</span><span>26.8 GB of weights resident on A100-40GB</span><span class="t">42.6s</span></div>
+    <div class="stage now"><span>&middot;</span><span>CLIP and DINOv2 towers reading the image</span><span class="t">11s</span></div>
+    <div class="stage"><span>&middot;</span><span>Vicuna-13B writing its answer</span><span class="t"></span></div>
+    <div class="bar"><i></i></div>
+  </div>
+  <p class="note">The cold path is 60&ndash;150s and most visitors on a quiet demo will hit it. Naming the real
+    stages turns the wait into the most credible minute on the site. Stage timings come from the live run,
+    not from guesses.</p>
+</div></section>
+
+<hr class="divide">
+
+<section><div class="wrap">
+  <h2 class="sec">Result &mdash; verbatim output from the 2026-08-17 run</h2>
+  <div class="result">
+    <div class="exhibit-row">
+      <div>
+        <div class="mat"><div class="img">exhibit</div></div>
+        <div class="exhibit-meta">_smoke_test.png<br>1536 &times; 1024 &middot; PNG<br>uploaded 17 Aug 2026</div>
+      </div>
+      <div class="compare">
+
+        <div class="col">
+          <div class="col-head">
+            <h3>Our fine-tune</h3>
+            <span class="t">9.9s</span>
+          </div>
+          <p class="prose">The image depicts a modern building with large glass windows, surrounded by
+            palm trees and a clear sky. Despite its seemingly authentic appearance, certain features,
+            such as disproportionate textures or odd lighting, hint that this image was generated by AI.</p>
+          <div class="verdict">
+            <span class="word">Fake</span>
+            <span class="src">greedy decoding &middot; reproducible</span>
+          </div>
+          <p class="asym">A fake verdict is the stronger of the two. Measured fake recall is 51.7%
+            against 100% real recall, so this model misses fakes more often than it doubts photographs.</p>
+        </div>
+
+        <div class="col">
+          <div class="col-head alt">
+            <h3>Original (PRIS-CV)</h3>
+            <span class="t">15.6s</span>
+          </div>
+          <div class="half">
+            <span class="lbl">low-level</span>
+            <p class="prose">The lighting on the building and the shadows on the objects do not match
+              the overall light source direction. The textures on the building and the surrounding
+              objects appear inconsistent and lack realistic detail.</p>
+          </div>
+          <div class="half">
+            <span class="lbl">high-level</span>
+            <p class="prose">The text on the building and the icons are nonsensical and do not form
+              coherent words or symbols.</p>
+          </div>
+          <div class="verdict">
+            <span class="word">Fake</span>
+            <span class="src">sampled at t=0.2 &middot; wording varies</span>
+          </div>
+          <p class="asym">This model runs with sampling on, the authors' published configuration. Ask it
+            twice about the same photograph and it will find different evidence both times.</p>
+        </div>
+
+      </div>
+    </div>
+    <p class="flagline">Truncated state, for when it happens: the model reached its 512-token limit and
+      stopped mid-sentence. What you see above is incomplete.</p>
+  </div>
+  <p class="note">Both paragraphs are verbatim, with the closing &ldquo;Therefore, this image is fake.&rdquo;
+    removed and the missing space after &ldquo;direction.&rdquo; repaired. The labelled halves are styled only
+    when the model emits them, so the flat-prose fine-tune renders as one paragraph without breaking.</p>
+</div></section>
+
+<hr class="divide">
+
+<section><div class="wrap">
+  <h2 class="sec">Locked tokens</h2>
+  <div class="tokens">
+    <div class="tok"><span class="sw" style="background:#F7F8F8"></span>--paper #F7F8F8</div>
+    <div class="tok"><span class="sw" style="background:#FFFFFF"></span>--card #FFFFFF</div>
+    <div class="tok"><span class="sw" style="background:#E9EAEA"></span>--mat #E9EAEA</div>
+    <div class="tok"><span class="sw" style="background:#16191C"></span>--ink #16191C</div>
+    <div class="tok"><span class="sw" style="background:#3D4348"></span>--body #3D4348</div>
+    <div class="tok"><span class="sw" style="background:#6E767C"></span>--muted #6E767C</div>
+    <div class="tok"><span class="sw" style="background:#008BD2"></span>--accent-bright #008BD2</div>
+    <div class="tok"><span class="sw" style="background:#00679E"></span>--accent #00679E</div>
+  </div>
+  <p class="spec">
+    <b>Both blues are from your own deck</b> &mdash; #008BD2 and the KAUST gold #FDB515 are the tokens on
+    slide 11. #00679E is the darkened variant for text, because #008BD2 on white is 3.4:1 and fails AA.<br>
+    <b>The gold has exactly one job</b> &mdash; the <span style="color:var(--ink)">truncated</span> state.
+    It is never decoration.<br>
+    <b>The image sits on a neutral mat, never on white.</b> A white surround shifts how you perceive the
+    photograph's own contrast, and the photograph is the thing being judged.<br>
+    <b>Three faces, three jobs.</b> Libre Franklin = the site's voice. Source Serif 4 = the model's words,
+    so a judge can see at a glance which text was generated. IBM Plex Mono = machine facts only:
+    timings, file metadata, decoding settings.<br>
+    <b>Scale</b> h1 clamp(31&ndash;54) &middot; lede clamp(16&ndash;18) &middot; prose 16.5 &middot;
+    verdict 19 &middot; label 11.<br>
+    <b>Separated by space, not by borders.</b> One card, one hairline rule per section, no shadows.<br>
+    <b>The pixel display font is cut.</b> On a light institutional page it reads as retro gaming rather
+    than instrument. If you want it, it belongs on a dark results page, not here.
+  </p>
+</div></section>
+
+<hr class="divide">
+
+<footer><div class="wrap">
+  Built on <span class="mono">AnnaGao/FakeReasoning</span> by PRIS-CV. Our contribution is LoRA adapters on
+  their weights &mdash; 62.6M parameters, 0.799% of the model &mdash; not a model trained from scratch.<br>
+  KAUST Academy, August 2026. Muhannad Alfwazan, Abdulqader Alfawzan, Ahmed Sayegh, Ziyad Alghamdi, Marwan Alayed.
+</div></footer>
+
+</body>
+</html>
