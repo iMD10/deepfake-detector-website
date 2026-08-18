@@ -477,22 +477,18 @@ body.doc-open{overflow:hidden}
 /* team */
 /* Flex, not grid: five names into three columns leaves grid with an empty
    sixth cell showing the divider colour. Flex stretches the last row. */
-.roster{
+.sec .roster{
   margin:0;padding:0;list-style:none;max-width:none;
   display:flex;flex-wrap:wrap;gap:1px;
   background:var(--doc-line);border:1px solid var(--doc-line);
   border-radius:4px;overflow:hidden;
 }
-.roster li{
+.sec .roster li{
   flex:1 1 190px;
   margin:0;padding:18px 16px;background:var(--doc-card);
   font-size:15.5px;line-height:1.4;color:var(--doc-ink);
 }
-.roster li::before{display:none}
-.roster li span{
-  display:block;margin-top:4px;
-  font-size:12px;color:var(--doc-muted);letter-spacing:.02em;
-}
+.sec .roster li::before{display:none}
 
 /* document foot */
 .flow-foot{border-top:1px solid var(--doc-line);background:var(--doc-card)}
