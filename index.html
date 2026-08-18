@@ -99,7 +99,7 @@
     data-src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260809_012548_ef22562c-c0ae-4816-ad9d-f8922af4e6a7.mp4"></video>
 </div>
 
-<div class="page">
+<div class="page" id="top">
 
   <header class="header">
     <a class="logo" href="/" aria-label="Home">
@@ -108,12 +108,13 @@
 
     <nav class="nav-pill" aria-label="Primary">
       <a href="/" class="active" aria-current="page">Home</a>
-      <a href="#doc-method">Method</a>
-      <a href="#doc-results">Results</a>
-      <a href="#doc-paper" data-paper>Paper</a>
+      <a href="#method">Method</a>
+      <a href="#results">Results</a>
+      <a href="#team">Team</a>
+      <a href="#paper" data-paper>Paper</a>
     </nav>
 
-    <a class="signin" href="#doc-paper" data-paper>Read the paper</a>
+    <a class="signin" href="#paper" data-paper>Read the paper</a>
 
     <button class="burger" id="burger" aria-expanded="false" aria-controls="mobile-menu" aria-label="Menu">
       <span></span><span></span><span></span>
@@ -187,15 +188,201 @@
 
 </div>
 
+<!-- ================================================================
+     The reading document. The landing above is still a locked viewport;
+     everything a judge sits down to read is here, on paper. Every figure
+     on this page is quoted from docs/model-contract.md.
+     ================================================================ -->
+<div class="flow">
+
+  <nav class="subnav" id="subnav" aria-label="Sections">
+    <a class="subnav-mark" href="#top" aria-label="Back to top">
+      <img src="assets/mark.svg" width="26" height="26" alt="">
+    </a>
+    <a href="#method">Method</a>
+    <a href="#results">Results</a>
+    <a href="#team">Team</a>
+    <a href="#paper">Paper</a>
+  </nav>
+
+  <section class="sec" id="method" aria-labelledby="method-h">
+    <div class="sec-in">
+      <h2 id="method-h">Method</h2>
+      <p class="lede">Two vision-language models read the same photograph and each write what
+        they found in it. Neither returns a number.</p>
+
+      <h3>What runs</h3>
+      <p>Both are LLaVA-style models with two vision towers. A CLIP tower and a DINOv2 tower
+        read the image; a Vicuna-13B decoder writes the answer as prose. Serving a request
+        holds 26.8&nbsp;GB of weights resident on the GPU.</p>
+      <p>Answers run 45 to 62 words. The generation cap is 512 tokens; when a model hits it and
+        stops mid-sentence the response is flagged <code>truncated</code>, and the page says so
+        rather than presenting half a note as finished.</p>
+
+      <h3>The two configurations</h3>
+      <div class="fig-wrap">
+        <table class="fig">
+          <thead>
+            <tr><th scope="col">&nbsp;</th><th scope="col">Our fine-tune</th><th scope="col">Original (PRIS-CV)</th></tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row">Precision</th><td>4-bit</td><td>FP16</td></tr>
+            <tr><th scope="row">GPU</th><td>A10G</td><td>A100-40GB</td></tr>
+            <tr><th scope="row">Decoding</th><td>Greedy, repetition penalty</td><td>Sampled, temperature 0.2</td></tr>
+            <tr><th scope="row">Same image twice</th><td>Identical answer</td><td>Different answer</td></tr>
+            <tr><th scope="row">Warm inference</th><td>9.9s</td><td>15.6s</td></tr>
+          </tbody>
+          <caption>Temperature 0.2 with sampling on is the authors' published configuration and
+            is not overridden. Ask the original model about one photograph twice and it will find
+            different evidence both times.</caption>
+        </table>
+      </div>
+
+      <h3>What we changed</h3>
+      <p>LoRA adapters on the released checkpoint: 62,586,880 trainable parameters, 0.799% of the
+        model. Both vision towers and the whole fusion stack were frozen, and are bit-identical
+        before and after training. This is not a model trained from scratch.</p>
+
+      <h3>What the system does not produce</h3>
+      <ul>
+        <li><b>No confidence score.</b> One was built from a logit pass and deliberately deleted
+          for being fragile and unfaithful to the model. There is no meter, gauge or percentage
+          of certainty anywhere on this site.</li>
+        <li><b>No heatmap.</b> Nothing in the response is spatial — no attention overlay, no
+          bounding box, no per-region score. The model's evidence is its prose.</li>
+        <li><b>No third verdict.</b> The prediction is only ever <code>real</code> or
+          <code>fake</code>. There is no uncertain state to fall back on.</li>
+      </ul>
+
+      <h3>What it costs</h3>
+      <div class="fig-wrap">
+        <table class="fig">
+          <thead>
+            <tr><th scope="col">&nbsp;</th><th scope="col">Warm</th><th scope="col">Cold load on top</th><th scope="col">Worst case</th></tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row">Our fine-tune</th><td>9.9s</td><td>~63s</td><td>~73s</td></tr>
+            <tr><th scope="row">Original (PRIS-CV)</th><td>15.6s</td><td>42.6s</td><td>~58s</td></tr>
+          </tbody>
+          <caption>Measured 17 August 2026 against the live deployment.</caption>
+        </table>
+      </div>
+      <p>Both classes scale to zero after five idle minutes, so most visitors to a quiet demo pay
+        the cold path. The honest phrase is that it takes up to a minute.</p>
+    </div>
+  </section>
+
+  <section class="sec" id="results" aria-labelledby="results-h">
+    <div class="sec-in">
+      <h2 id="results-h">Results</h2>
+      <p class="lede">Fine-tuning did not make the model more accurate on unseen generators. It
+        made the model separate the two classes further apart, and it moved the prior.</p>
+
+      <div class="fig-wrap">
+        <table class="fig">
+          <thead>
+            <tr><th scope="col">Metric</th><th scope="col">Base</th><th scope="col">Fine-tuned</th></tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row">In-distribution accuracy (n=50)</th><td>64.0%</td><td>72.0%</td></tr>
+            <tr><th scope="row">Class separation</th><td>+0.274</td><td>+0.520</td></tr>
+            <tr><th scope="row">Out-of-distribution accuracy, 10 unseen generators</th><td>92.5%</td><td>92.5%</td></tr>
+            <tr><th scope="row">Recall, real</th><td>61.9%</td><td>100.0%</td></tr>
+            <tr><th scope="row">Recall, fake</th><td>65.5%</td><td>51.7%</td></tr>
+            <tr><th scope="row">Answers &ldquo;real&rdquo;</th><td>46.0%</td><td>70.0%</td></tr>
+            <tr><th scope="row">Explanation diversity, in-distribution</th><td>94.0%</td><td>80.0%</td></tr>
+          </tbody>
+          <caption>KAUST Academy report, 17 August 2026.</caption>
+        </table>
+      </div>
+
+      <h3>Per generator, four images each</h3>
+      <p>DALL&middot;E 3 100% &middot; GigaGAN 100% &middot; GPT-4o 100% &middot; DeepFloyd IF 100%
+        &middot; PixArt 100% &middot; Stable Diffusion 100% &middot; StyleGAN-XL 100% &middot;
+        Flux 75% &middot; Kandinsky 75% &middot; Midjourney 75%.</p>
+
+      <p class="note warn"><b>The weakness stays on the page.</b> Fake recall fell to 51.7% while
+        real recall reached 100.0%, and the fine-tune answers &ldquo;real&rdquo; 70% of the time. A
+        fake verdict from this model is therefore stronger evidence than a real one. That is said
+        next to the verdict itself, not hidden in a footnote.</p>
+
+      <p class="note"><b>On quoting these numbers.</b> The accuracy point estimates come from small
+        samples and should not be quoted without that caveat. At n=50 in-distribution, one image is
+        two percentage points; each per-generator cell is four images, so one image is 25 points.
+        Class separation and the shift in the prior are the findings the authors consider robust
+        at this scale.</p>
+    </div>
+  </section>
+
+  <section class="sec" id="team" aria-labelledby="team-h">
+    <div class="sec-in">
+      <h2 id="team-h">Team</h2>
+      <p class="lede">Five people, KAUST Academy, August 2026.</p>
+
+      <ul class="roster">
+        <li>Muhannad Alfwazan<span>KAUST Academy</span></li>
+        <li>Abdulqader Alfawzan<span>KAUST Academy</span></li>
+        <li>Ahmed Sayegh<span>KAUST Academy</span></li>
+        <li>Ziyad Alghamdi<span>KAUST Academy</span></li>
+        <li>Marwan Alayed<span>KAUST Academy</span></li>
+      </ul>
+
+      <p class="note">Individual roles are not recorded in any project document, so none are
+        listed here rather than guessed at. Send them over and they go in.</p>
+    </div>
+  </section>
+
+  <section class="sec" id="paper" aria-labelledby="paper-h">
+    <div class="sec-in">
+      <h2 id="paper-h">Paper</h2>
+      <p class="lede">A KAUST Academy report dated 17 August 2026. Every figure on this page is
+        taken from it.</p>
+
+      <p class="note"><b>Not published yet.</b> There is no public link to the report, and no
+        preprint identifier, so there is nothing here to click. When the team publishes it, this
+        section and the &ldquo;Read the paper&rdquo; button both point at it from a single
+        constant in <code>main.js</code>.</p>
+
+      <h3>What it reports</h3>
+      <ul>
+        <li>Class separation widened from <b>+0.274 to +0.520</b> — the finding the authors
+          consider robust at this sample size.</li>
+        <li>Out-of-distribution accuracy across ten unseen generators held at <b>92.5%</b>,
+          unchanged by fine-tuning.</li>
+        <li>The prior moved: the model answers &ldquo;real&rdquo; 70% of the time against 46%
+          before, which is what drives real recall to 100% and fake recall down to 51.7%.</li>
+        <li>Trainable parameters <b>62,586,880</b>, 0.799% of the model, with both vision towers
+          and the fusion stack frozen and verified bit-identical.</li>
+      </ul>
+
+      <h3>Base checkpoint</h3>
+      <p>Built on <code>AnnaGao/FakeReasoning</code> by PRIS-CV. The team's contribution is the
+        LoRA adapters described above, applied to their released weights.</p>
+    </div>
+  </section>
+
+  <footer class="sec flow-foot">
+    <div class="sec-in">
+      <p>Built on <code>AnnaGao/FakeReasoning</code> by PRIS-CV. Our contribution is LoRA adapters
+        on their weights, 62.6M parameters, 0.799% of the model — not a model trained from
+        scratch. KAUST Academy, August 2026.</p>
+      <p>The fine-tune does not have a public name yet. Until the team settles one, the two
+        options are labelled &ldquo;Our fine-tune&rdquo; and &ldquo;Original (PRIS-CV)&rdquo;.</p>
+    </div>
+  </footer>
+
+</div>
+
 <div class="overlay" id="overlay" hidden></div>
 
 <div class="sheet" id="mobile-menu" hidden>
   <nav aria-label="Mobile">
     <a href="/" class="active" aria-current="page">Home</a>
-    <a href="#doc-method">Method</a>
-    <a href="#doc-results">Results</a>
-    <a href="#doc-paper" data-paper>Paper</a>
-    <a href="#doc-paper" class="sheet-cta" data-paper>Read the paper</a>
+    <a href="#method">Method</a>
+    <a href="#results">Results</a>
+    <a href="#team">Team</a>
+    <a href="#paper" data-paper>Paper</a>
+    <a href="#paper" class="sheet-cta" data-paper>Read the paper</a>
   </nav>
 </div>
 
@@ -218,7 +405,7 @@
         </dl>
       </div>
 
-      <div class="doc-compare" id="doc-results">
+      <div class="doc-compare">
 
         <article class="model" data-model="finetune">
           <header>
@@ -258,11 +445,11 @@
     <p class="flag" id="flag" hidden>The model reached its 512-token limit and stopped mid-sentence.
       What you see above is incomplete.</p>
 
-    <p class="doc-foot" id="doc-method">No confidence score is produced, and none is shown &mdash; the verdict is parsed from
+    <p class="doc-foot">No confidence score is produced, and none is shown &mdash; the verdict is parsed from
       the model's own closing sentence, which is removed above so it is not stated twice. There is no
       heatmap: this model's evidence is its prose.</p>
 
-    <p class="doc-foot" id="doc-paper">Built on <code>AnnaGao/FakeReasoning</code> by PRIS-CV. Our contribution is LoRA adapters on their
+    <p class="doc-foot">Built on <code>AnnaGao/FakeReasoning</code> by PRIS-CV. Our contribution is LoRA adapters on their
       weights, 62.6M parameters, 0.799% of the model &mdash; not a model trained from scratch.
       KAUST Academy, August 2026.</p>
 

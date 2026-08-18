@@ -40,10 +40,11 @@
 
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
+html{scroll-behavior:smooth}
 body{
   background:var(--bg);color:var(--text);
   font-family:var(--font-sans);
-  height:100vh;height:100dvh;overflow:hidden;
+  min-height:100vh;min-height:100dvh;overflow-x:hidden;
   -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
 }
 
@@ -51,6 +52,16 @@ body{
 .bg{position:absolute;inset:0;background:var(--bg);overflow:hidden}
 .bg-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
   pointer-events:none;z-index:0}
+/* Scrim. The footage runs bright lavender in places and the whole landing is
+   white type over it, so the contrast floor cannot be met against the video
+   alone. Darkest at the edges and behind the headline, lightest at the top
+   third where the footage does its work. */
+.bg::after{
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:1;
+  background:
+    radial-gradient(115% 75% at 50% 44%, rgba(0,0,0,.50) 0%, rgba(0,0,0,.58) 60%, rgba(0,0,0,.74) 100%),
+    linear-gradient(180deg, rgba(0,0,0,.42) 0%, rgba(0,0,0,.26) 26%, rgba(0,0,0,.46) 68%, rgba(0,0,0,.66) 100%);
+}
 
 /* ---------------- page shell ---------------- */
 .page{
@@ -77,7 +88,7 @@ body{
 .logo img{width:72%;height:72%;object-fit:contain;display:block}
 
 .nav-pill{
-  flex:1 1 auto;max-width:430px;
+  flex:1 1 auto;max-width:486px;
   height:clamp(44px,5.2vw,48px);
   background:#fff;border-radius:999px;box-shadow:var(--nav-shadow);
   padding:4px 8px;
@@ -86,9 +97,9 @@ body{
 .nav-pill a{
   position:relative;
   font-family:var(--font-sans);font-weight:500;
-  font-size:clamp(13px,1.4vw,15px);letter-spacing:-.01em;
+  font-size:clamp(12.5px,1.35vw,14.5px);letter-spacing:-.01em;
   color:var(--nav-text);text-decoration:none;opacity:.5;
-  padding:6px 10px 9px;
+  padding:6px 9px 9px;
   transition:opacity .18s var(--ease);
 }
 .nav-pill a:hover{opacity:.75}
@@ -170,7 +181,10 @@ body{
   line-height:1.12;letter-spacing:-.04em;color:#fff;
   white-space:nowrap;overflow:hidden;
 }
-.headline span{display:block;opacity:0;transform:translateY(14px)}
+/* Scoped to .anim: a headline without it must be visible, not hidden waiting
+   for an animation that never runs. */
+.headline span{display:block}
+.headline.anim span{opacity:0;transform:translateY(14px)}
 .headline.anim .l1{animation:headlineFade .85s var(--ease) .12s forwards}
 .headline.anim .l2{animation:headlineFade .85s var(--ease) .3s forwards}
 
@@ -178,7 +192,7 @@ body{
   max-width:min(500px,92%);
   margin:0 0 clamp(20px,3vh,30px);
   font-size:clamp(calc(13.5px + 2pt),calc(1.55vw + 2pt),calc(16.5px + 2pt));
-  font-weight:400;line-height:1.55;color:#d0d0d0;opacity:.8;
+  font-weight:400;line-height:1.55;color:#d8d8d8;opacity:.95;
 }
 
 /* cta */
@@ -213,7 +227,7 @@ body{
 .stages ol{list-style:none;margin:0;padding:0}
 .stages li{
   display:grid;grid-template-columns:16px 1fr auto;gap:10px;align-items:baseline;
-  padding:5px 0;font-size:13px;color:#6f6f6f;
+  padding:5px 0;font-size:13px;color:var(--muted);
 }
 .stages li i{font-style:normal}
 .stages li b{font-weight:400;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
@@ -283,6 +297,7 @@ body{
 .sheet a:nth-child(3){animation-delay:.16s}
 .sheet a:nth-child(4){animation-delay:.21s}
 .sheet a:nth-child(5){animation-delay:.26s}
+.sheet a:nth-child(6){animation-delay:.31s}
 .sheet a.active::after{
   content:"";position:absolute;left:50%;bottom:8px;
   width:3px;height:3px;border-radius:50%;background:#000;
@@ -370,6 +385,121 @@ body.menu-open{overflow:hidden}
   border-radius:3px;padding:1px 5px}
 body.doc-open{overflow:hidden}
 
+/* ---------------- the reading document ----------------
+   Below the locked landing. Same paper tokens as the result panel, because
+   it is the same register: this is the part faculty actually read. */
+.flow{position:relative;z-index:2;background:var(--doc-paper);color:var(--doc-body)}
+
+.subnav{
+  position:fixed;z-index:7;left:50%;top:14px;
+  transform:translateX(-50%) translateY(-160%);
+  display:flex;align-items:center;gap:2px;
+  background:var(--doc-card);border:1px solid var(--doc-line);
+  border-radius:999px;padding:5px 8px 5px 5px;
+  box-shadow:var(--nav-shadow);
+  transition:transform .32s var(--ease),opacity .32s var(--ease);
+  opacity:0;
+}
+.subnav.on{transform:translateX(-50%) translateY(0);opacity:1}
+.subnav a{
+  display:grid;place-items:center;min-height:34px;padding:0 12px;
+  font-size:13px;font-weight:500;letter-spacing:-.01em;
+  color:var(--doc-muted);text-decoration:none;border-radius:999px;
+  transition:color .18s var(--ease),background .18s var(--ease);
+}
+.subnav a:hover{color:var(--doc-ink);background:var(--doc-paper)}
+.subnav a.here{color:var(--doc-ink);background:var(--doc-mat)}
+.subnav a:focus-visible{outline:2px solid var(--doc-accent);outline-offset:2px}
+.subnav-mark{padding:0 4px;min-height:34px}
+.subnav-mark img{display:block;width:26px;height:26px;border-radius:6px}
+
+.sec{border-top:1px solid var(--doc-line)}
+.sec:first-of-type{border-top:0}
+.sec-in{
+  max-width:820px;margin:0 auto;
+  padding:clamp(44px,7vh,84px) clamp(18px,5vw,32px);
+}
+.sec h2{
+  margin:0 0 6px;font-size:clamp(24px,4vw,38px);font-weight:600;
+  letter-spacing:-.03em;line-height:1.1;color:var(--doc-ink);
+}
+.sec .lede{
+  margin:0 0 clamp(26px,4vh,40px);max-width:60ch;
+  font-size:clamp(15.5px,1.7vw,17.5px);line-height:1.6;color:var(--doc-body);
+}
+.sec h3{
+  margin:34px 0 10px;font-size:12px;font-weight:600;
+  letter-spacing:.1em;text-transform:uppercase;color:var(--doc-muted);
+}
+.sec p{margin:0 0 12px;max-width:66ch;font-size:15px;line-height:1.7}
+.sec code{
+  font-size:.9em;background:var(--doc-card);border:1px solid var(--doc-line);
+  border-radius:3px;padding:1px 5px;
+}
+.sec ul{margin:0;padding:0;list-style:none;max-width:66ch}
+.sec ul li{
+  margin:0 0 10px;padding-left:16px;position:relative;
+  font-size:15px;line-height:1.7;
+}
+.sec ul li::before{
+  content:"";position:absolute;left:0;top:.62em;
+  width:5px;height:5px;border-radius:50%;background:var(--doc-muted);
+}
+.sec ul li b{color:var(--doc-ink);font-weight:600}
+
+/* tables */
+.fig-wrap{overflow-x:auto;margin:0 0 14px;-webkit-overflow-scrolling:touch}
+.fig{border-collapse:collapse;width:100%;min-width:420px;font-size:14px}
+.fig caption{
+  caption-side:bottom;padding-top:10px;text-align:left;
+  font-size:12px;line-height:1.6;color:var(--doc-muted);
+}
+.fig th,.fig td{padding:9px 12px 9px 0;text-align:left;vertical-align:top}
+.fig thead th{
+  font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--doc-muted);border-bottom:2px solid var(--doc-ink);
+}
+.fig tbody th{font-weight:400;color:var(--doc-body)}
+.fig tbody td{color:var(--doc-ink);font-variant-numeric:tabular-nums}
+.fig tbody tr{border-bottom:1px solid var(--doc-line)}
+.fig td:last-child{font-weight:600}
+
+/* callouts */
+.note{
+  margin:18px 0 0;padding:14px 16px;border-radius:4px;max-width:66ch;
+  background:var(--doc-card);border:1px solid var(--doc-line);
+  border-left:3px solid var(--doc-muted);
+  font-size:13.5px;line-height:1.7;color:var(--doc-body);
+}
+.note b{color:var(--doc-ink)}
+.note.warn{background:var(--doc-flag-bg);border-color:#F0DCA8;border-left-color:var(--doc-flag)}
+
+/* team */
+/* Flex, not grid: five names into three columns leaves grid with an empty
+   sixth cell showing the divider colour. Flex stretches the last row. */
+.roster{
+  margin:0;padding:0;list-style:none;max-width:none;
+  display:flex;flex-wrap:wrap;gap:1px;
+  background:var(--doc-line);border:1px solid var(--doc-line);
+  border-radius:4px;overflow:hidden;
+}
+.roster li{
+  flex:1 1 190px;
+  margin:0;padding:18px 16px;background:var(--doc-card);
+  font-size:15.5px;line-height:1.4;color:var(--doc-ink);
+}
+.roster li::before{display:none}
+.roster li span{
+  display:block;margin-top:4px;
+  font-size:12px;color:var(--doc-muted);letter-spacing:.02em;
+}
+
+/* document foot */
+.flow-foot{border-top:1px solid var(--doc-line);background:var(--doc-card)}
+.flow-foot .sec-in{padding-top:32px;padding-bottom:40px}
+.flow-foot p{margin:0 0 10px;font-size:12.5px;line-height:1.75;color:var(--doc-muted)}
+.flow-foot a{color:var(--doc-accent)}
+
 /* ---------------- breakpoints ---------------- */
 @media(max-width:900px){
   .doc-grid{grid-template-columns:1fr}
@@ -438,6 +568,7 @@ body.doc-open{overflow:hidden}
 a.cta{display:inline-grid;place-items:center;min-height:44px;text-decoration:none}
 
 @media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
   *,*::before,*::after{animation:none!important;transition:none!important}
   .anim,.stat,.stages{opacity:1!important;transform:none!important;filter:none!important}
   .headline span{opacity:1!important;transform:none!important}
