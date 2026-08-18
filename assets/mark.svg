@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 104 104" role="img" aria-label="Two readings of one photograph">
+  <rect width="104" height="104" rx="23" fill="#000000"/>
+  <g fill="none" stroke="#ffffff" stroke-width="7">
+    <circle cx="38" cy="52" r="28"/>
+    <circle cx="66" cy="52" r="28"/>
+  </g>
+</svg>
