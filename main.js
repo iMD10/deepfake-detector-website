@@ -8,22 +8,24 @@
 
   /* ------------------------------------------------------- the backend
 
-     Point API at the Modal web endpoint of fakereasoning-api. Modal serves
-     these as https://<workspace>--<app>-<function>.modal.run, so it will
-     look something like:
+     The live deployment of the fakereasoning-api Modal app. Its contract was
+     read from the deployment's own /openapi.json, not assumed:
 
-       var API = "https://kaust-academy--fakereasoning-api-analyse.modal.run";
+       POST /api/v1/analyze   multipart: file=<image>, model=kaust|official
+                              200 -> one flat AnalysisResponse
+                              413 415 422 429 502 504 -> ErrorResponse
+       POST /api/v1/warmup    multipart: model=<id>, 202 and returns at once
+       GET  /health           liveness
 
-     That is the only edit this file needs. Leave it empty and the page runs
-     in demo mode, replaying the verbatim 2026-08-17 run instead of spending
-     GPU time — keep that path working, it is how the site gets reviewed.
+     One call answers for one checkpoint, so the two-column comparison is two
+     calls in parallel. Model ids come from the backend's model_catalog.py.
 
-     The request is multipart: `image` is the file, `models` selects which
-     checkpoints answer. The timeout matches FR_IDLE_TIMEOUT=300 on the
-     backend, because a visitor arriving after a quiet five minutes pays for
-     a container start and 26.8 GB of weights before any inference begins. */
-  var API = "";
-  var MODELS = "both";
+     Set API to "" to go back to demo mode, which replays the verbatim
+     2026-08-17 run instead of spending GPU time. Keep that path working. */
+  var API = "https://hanooodaey--fakereasoning-api-fastapi-app.modal.run";
+  var ANALYZE = "/api/v1/analyze";
+  var WARMUP = "/api/v1/warmup";
+  var MODEL_IDS = { finetune: "kaust", official: "official" };
   var API_TIMEOUT_MS = 300000;
 
   var RETRY_HINT = " The models scale to zero after five idle minutes, so a cold " +
@@ -168,6 +170,7 @@
 
     stages.hidden = false;
     ctaWrap.hidden = true;
+    document.body.classList.add("working");
     stageEl("boot").classList.add("now");
 
     var tick = setInterval(function () {
@@ -202,6 +205,7 @@
     timers = [];
     stages.hidden = true;
     ctaWrap.hidden = false;
+    document.body.classList.remove("working");
     bar.style.width = "0";
     ORDER.forEach(function (n) {
       stageEl(n).classList.remove("now", "done");
@@ -279,12 +283,12 @@
 
   /* Shown when the backend answered, but not for this model. Better than
      leaving the other column's prose from the previous run standing. */
-  function paintMissing(which) {
+  function paintMissing(which, reason) {
     var say = document.getElementById(which === "official" ? "say-of" : "say-ft");
     var verdict = document.getElementById(which === "official" ? "v-of" : "v-ft");
     var ms = document.querySelector('.model[data-model="' + which + '"] .ms');
     var p = document.createElement("p");
-    p.textContent = "No answer came back from this model.";
+    p.textContent = reason || "No answer came back from this model.";
     say.textContent = "";
     say.appendChild(p);
     verdict.textContent = "—";
@@ -348,86 +352,86 @@
     resetStages();
   }
 
-  /* Two response shapes are in play. main.js was written against an envelope
-     keyed by model; docs/model-contract.md documents a single flat result.
-     Rather than guess, accept both — and a list, which is the third obvious
-     way to return two answers. A flat result is routed by model_revision,
-     the only field that says which checkpoint replied. */
-  function normalise(json) {
-    var out = { finetune: null, official: null };
-
-    function place(result) {
-      if (!result || typeof result !== "object") return;
-      var rev = String(result.model_revision || "");
-      if (/^finetun/i.test(rev)) out.finetune = result;
-      else if (/^official/i.test(rev)) out.official = result;
-    }
-
-    if (json && (json.finetune || json.official)) {
-      out.finetune = json.finetune || null;
-      out.official = json.official || null;
-      return out;
-    }
-    if (Array.isArray(json)) { json.forEach(place); return out; }
-    if (json && Array.isArray(json.results)) { json.results.forEach(place); return out; }
-    place(json);
-    return out;
+  /* Route a result to its column. The deployed build returns model_id; older
+     builds do not, so fall back to model_revision, and finally to whichever
+     model we asked for. */
+  function columnFor(result, requested) {
+    var id = String(result.model_id || "");
+    if (id === "kaust") return "finetune";
+    if (id === "official") return "official";
+    var rev = String(result.model_revision || "");
+    if (/^finetun/i.test(rev)) return "finetune";
+    if (/^official/i.test(rev)) return "official";
+    return requested;
   }
 
   /* Say what actually went wrong. "Failed to fetch" sends someone looking at
-     the model when the endpoint is misspelt. */
+     the model when the real problem is CORS or a stopped app. `config` marks
+     the failures that retrying cannot fix. */
   function failureFor(status) {
     if (status === 404) return { msg: "No endpoint at that address (404). Check API in main.js.", config: true };
     if (status === 401 || status === 403) return { msg: "The backend refused the request (" + status + ").", config: true };
     if (status === 405) return { msg: "The endpoint rejected a POST (405). Check API in main.js.", config: true };
-    if (status === 413) return { msg: "The backend rejected the image as too large (413).", config: true };
+    if (status === 413) return { msg: "That image is larger than the backend accepts (413).", config: true };
+    if (status === 415) return { msg: "The backend does not accept that image type (415).", config: true };
     if (status === 422) return { msg: "The backend could not read that image (422).", config: true };
-    if (status === 429) return { msg: "The backend is rate limiting (429).", config: false };
+    if (status === 429) return { msg: "Too many analyses from this address (429).", config: false };
+    if (status === 502) return { msg: "The API could not reach the GPU tier (502).", config: false };
+    if (status === 504) return { msg: "The GPU tier did not answer in time (504).", config: false };
     if (status >= 500) return { msg: "The backend errored (" + status + ").", config: false };
     return { msg: "The backend returned " + status + ".", config: false };
   }
 
-  function callBackend(file) {
+  /* The API returns its own error envelope: {code, message, request_id,
+     retryable}. Its message is written for a reader, so prefer it. */
+  function readError(response) {
+    var fallback = failureFor(response.status);
+    return response.json().then(function (b) {
+      var err = new Error((b && b.message) || fallback.msg);
+      err.config = fallback.config;
+      err.retryable = b && typeof b.retryable === "boolean" ? b.retryable : !fallback.config;
+      err.requestId = b && b.request_id;
+      return err;
+    }, function () {
+      var err = new Error(fallback.msg);
+      err.config = fallback.config;
+      err.retryable = !fallback.config;
+      return err;
+    });
+  }
+
+  /* Fire and forget. /warmup returns 202 without doing work; its only job is
+     to start the right GPU container booting while the visitor is still in
+     the file picker, which is the bulk of the cold path. */
+  function warmup() {
+    if (!API) return;
+    ["finetune", "official"].forEach(function (col) {
+      var body = new FormData();
+      body.append("model", MODEL_IDS[col]);
+      fetch(API + WARMUP, { method: "POST", body: body }).catch(function () {});
+    });
+  }
+
+  function analyseOne(file, modelId, signal) {
     var body = new FormData();
-    body.append("image", file);
-    body.append("models", MODELS);
-
-    var controller = window.AbortController ? new AbortController() : null;
-    var timedOut = false;
-    var timer = setTimeout(function () {
-      timedOut = true;
-      if (controller) controller.abort();
-    }, API_TIMEOUT_MS);
-
+    body.append("file", file);
+    body.append("model", modelId);
     var opts = { method: "POST", body: body };
-    if (controller) opts.signal = controller.signal;
+    if (signal) opts.signal = signal;
 
-    function done(v) { clearTimeout(timer); return v; }
-
-    return fetch(API, opts).then(function (r) {
-      if (!r.ok) {
-        var f = failureFor(r.status);
-        return r.text().catch(function () { return ""; }).then(function (body) {
-          done();
-          var err = new Error(f.msg);
-          err.config = f.config;
-          err.detail = String(body).slice(0, 300);
-          throw err;
+    return fetch(API + ANALYZE, opts).then(function (r) {
+      if (r.ok) {
+        return r.json().then(null, function () {
+          var e = new Error("The backend replied with something that is not JSON.");
+          e.config = true;
+          throw e;
         });
       }
-      return r.json().then(done, function () {
-        done();
-        var err = new Error("The backend replied with something that is not JSON.");
-        err.config = true;
-        throw err;
-      });
+      return readError(r).then(function (e) { throw e; });
     }, function (e) {
-      done();
-      if (timedOut || e.name === "AbortError") {
-        throw new Error("No answer in five minutes, so the request was given up on.");
-      }
-      var err = new Error("The request never reached the backend. It may be offline, " +
-        "or blocking this origin with CORS.");
+      if (e.name === "AbortError") throw e;
+      var err = new Error("The request never reached the backend. It may be stopped, " +
+        "or refusing this origin with CORS.");
       err.config = true;
       throw err;
     });
@@ -475,6 +479,11 @@
 
   document.getElementById("analyse").addEventListener("click", function () {
     clearError();
+    /* Warm both GPU classes now, not on file select. Choosing a file takes a
+       visitor several seconds and the containers need about a minute, so this
+       is the only moment where the head start is worth anything. It costs a
+       boot if they cancel the picker, which is what /warmup is for. */
+    warmup();
     fileInput.click();
   });
 
@@ -508,30 +517,66 @@
       return;
     }
 
-    callBackend(file)
-      .then(function (json) {
-        var models = normalise(json);
-        if (!models.finetune && !models.official) {
-          var err = new Error("The backend replied, but with no result this page could read.");
-          err.config = true;
-          throw err;
-        }
+    /* Two calls, one per checkpoint, in parallel. Neither is allowed to sink
+       the other: each settles into {ok, value|error} so one model failing
+       still shows the one that answered. */
+    var controller = window.AbortController ? new AbortController() : null;
+    var timedOut = false;
+    var timer = setTimeout(function () {
+      timedOut = true;
+      if (controller) controller.abort();
+    }, API_TIMEOUT_MS);
+    var signal = controller ? controller.signal : null;
 
-        stop();
-        resetPanel();
+    function settle(p) {
+      return p.then(function (v) { return { ok: true, value: v }; },
+                    function (e) { return { ok: false, error: e }; });
+    }
 
-        if (models.finetune) paintModel("finetune", models.finetune);
-        else paintMissing("finetune");
-        if (models.official) paintModel("official", models.official);
-        else paintMissing("official");
+    var columns = ["finetune", "official"];
 
-        openDoc(file, (models.official || models.finetune).image);
-      })
-      .catch(function (e) {
-        resetStages();
-        if (e.detail) console.error("Backend said:", e.detail);
-        showError(e.message + (e.config ? "" : RETRY_HINT));
+    Promise.all(columns.map(function (col) {
+      return settle(analyseOne(file, MODEL_IDS[col], signal));
+    })).then(function (settled) {
+      clearTimeout(timer);
+
+      if (timedOut) {
+        throw new Error("No answer in five minutes, so the request was given up on.");
+      }
+
+      var painted = {};
+      var duplicate = false;
+      var firstError = null;
+
+      settled.forEach(function (s, i) {
+        if (!s.ok) { firstError = firstError || s.error; return; }
+        var col = columnFor(s.value, columns[i]);
+        /* A backend without the model selector answers with its default both
+           times. Show it once rather than twice under two different headings. */
+        if (painted[col]) { duplicate = true; return; }
+        painted[col] = s.value;
       });
+
+      if (!painted.finetune && !painted.official) {
+        throw firstError || new Error("The backend replied, but with no result this page could read.");
+      }
+
+      stop();
+      resetPanel();
+
+      columns.forEach(function (col) {
+        if (painted[col]) paintModel(col, painted[col]);
+        else if (duplicate) paintMissing(col, "This deployment has no model selector, so both requests returned the same checkpoint.");
+        else paintMissing(col, firstError ? firstError.message : null);
+      });
+
+      openDoc(file, (painted.official || painted.finetune).image);
+    }).catch(function (e) {
+      clearTimeout(timer);
+      resetStages();
+      if (e.requestId) console.error("Backend request id:", e.requestId);
+      showError(e.message + (e.config ? "" : RETRY_HINT));
+    });
   });
 
 })();
