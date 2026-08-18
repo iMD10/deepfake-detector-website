@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Internal design references, not pages.
+Disallow: /brand.html
+Disallow: /brand-light.html
+
+Sitemap: https://fakereasoning.example/sitemap.xml

@@ -1,0 +1,59 @@
+# Not a score. An argument.
+
+> A detector for AI-generated and manipulated images that answers in prose
+> rather than with a probability. Upload a photograph and two vision-language
+> models each write what they found in it. Built by a five-person KAUST
+> Academy team, August 2026.
+
+Most detectors output a score. A score of 0.83 gives an editor nothing to
+check, cite, or appeal. This one outputs an argument: the verdict is a
+sentence inside a written explanation of what the model saw.
+
+## The two models
+
+- **Our fine-tune** — LoRA adapters on the released checkpoint, 4-bit,
+  greedy decoding, reproducible, 9.9s warm inference.
+- **Original (PRIS-CV)** — the published checkpoint at FP16, sampled at
+  temperature 0.2, different wording on every run, 15.6s warm inference.
+
+The fine-tune has no public name yet. Do not invent one.
+
+## Attribution
+
+Built on the base checkpoint `AnnaGao/FakeReasoning` by PRIS-CV. The team's
+contribution is LoRA adapters on those weights: 62,586,880 trainable
+parameters, 0.799% of the model. This is not a model trained from scratch.
+
+## Measured results
+
+- 92.5% accuracy across ten unseen generators, unchanged by fine-tuning
+- Class separation +0.520, up from +0.274
+- In-distribution accuracy 64.0% to 72.0%
+- Fake recall 51.7%, real recall 100.0%
+- The fine-tune answers "real" 70% of the time
+
+The accuracy point estimates come from small samples — n=50
+in-distribution, four images per generator — and should not be quoted
+without that caveat. Class separation and the prior shift are the findings
+the authors consider robust at this scale.
+
+## The known weakness
+
+Fake recall fell to 51.7% while real recall reached 100.0%. A fake verdict
+from this model is therefore stronger evidence than a real one. This is
+stated on the page next to the verdict, not hidden in a footnote.
+
+## What the system does not produce
+
+- No confidence score, percentage, meter, or gauge. One was built and
+  deliberately removed for being unfaithful to the model.
+- No heatmap, attention overlay, or bounding box. Nothing in the response
+  is spatial.
+- No verdict other than "real" or "fake". There is no uncertain state.
+
+## Timing
+
+Warm inference is 9.9s for the fine-tune and 15.6s for the official model.
+Both scale to zero after five idle minutes, so a visitor arriving after a
+quiet period pays a cold start and can wait up to about a minute. The site
+never describes itself as real-time or instant.
