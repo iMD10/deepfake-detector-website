@@ -39,6 +39,51 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="preload" href="fonts/DotGothic16-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="styles.css">
+
+<!-- ScholarlyArticle is deliberately absent. The authors, the date and the
+     base checkpoint are all known, but the paper has no title and no URL in
+     any project document, and structured data is not the place to guess one.
+     Supply a title and a link and it goes in as a fourth node. -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://fakereasoning.example/#team",
+      "name": "KAUST Academy",
+      "url": "https://fakereasoning.example/",
+      "logo": "https://fakereasoning.example/assets/mark.svg",
+      "member": [
+        { "@type": "Person", "name": "Muhannad Alfwazan" },
+        { "@type": "Person", "name": "Abdulqader Alfawzan" },
+        { "@type": "Person", "name": "Ahmed Sayegh" },
+        { "@type": "Person", "name": "Ziyad Alghamdi" },
+        { "@type": "Person", "name": "Marwan Alayed" }
+      ]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://fakereasoning.example/#site",
+      "url": "https://fakereasoning.example/",
+      "name": "Not a score. An argument.",
+      "description": "A detector for AI-generated images that answers in prose rather than with a probability.",
+      "inLanguage": "en",
+      "publisher": { "@id": "https://fakereasoning.example/#team" }
+    },
+    {
+      "@type": "CreativeWork",
+      "@id": "https://fakereasoning.example/#model",
+      "name": "Fine-tuned FakeReasoning adapters",
+      "description": "LoRA adapters trained on AnnaGao/FakeReasoning: 62,586,880 trainable parameters, 0.799% of the model. Out-of-distribution accuracy across ten unseen generators is 92.5%, unchanged by fine-tuning; class separation rises from +0.274 to +0.520.",
+      "isBasedOn": "https://huggingface.co/AnnaGao/FakeReasoning",
+      "creator": { "@id": "https://fakereasoning.example/#team" },
+      "dateCreated": "2026-08-17",
+      "license": "https://huggingface.co/AnnaGao/FakeReasoning"
+    }
+  ]
+}
+</script>
 </head>
 <body>
 
