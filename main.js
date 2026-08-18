@@ -15,6 +15,40 @@
      ordinary external links, no other change required. */
   var PAPER_URL = "";
 
+  /* ------------------------------------------------------- hero video
+
+     The current file is 13.21 MB against a 1.5 MB budget, so it is opt-in
+     rather than opt-out. Three refusals, each for its own reason:
+
+       reduced motion  the DoD says fall back to the poster, and an autoplay
+                       attribute cannot be cancelled from CSS
+       narrow viewport phone data, and the video is cropped to a sliver there
+       Save-Data       the visitor has asked, in a header, not to be sent this
+
+     In every refused case the poster carries the page on its own. */
+  (function heroVideo() {
+    var video = document.getElementById("bg-video");
+    if (!video) return;
+
+    var narrow = window.matchMedia("(max-width: 720px)").matches;
+    var conn = navigator.connection || {};
+    var metered = conn.saveData === true;
+
+    if (REDUCED || narrow || metered) {
+      video.remove();
+      document.getElementById("bg").classList.add("bg-still");
+      return;
+    }
+
+    var source = document.createElement("source");
+    source.type = "video/mp4";
+    source.src = video.dataset.src;
+    video.appendChild(source);
+    video.load();
+    var p = video.play();
+    if (p && p.catch) p.catch(function () { /* autoplay refused; poster stays */ });
+  })();
+
   /* ---------------------------------------------------------------- stats */
 
   function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }

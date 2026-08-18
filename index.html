@@ -89,13 +89,14 @@
 
 <a class="skip" href="#main">Skip to content</a>
 
-<div class="bg">
-  <video class="bg-video" autoplay muted loop playsinline poster="assets/poster.webp">
-    <source
-      src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260809_012548_ef22562c-c0ae-4816-ad9d-f8922af4e6a7.mp4"
-      type="video/mp4"
-    />
-  </video>
+<!-- No autoplay attribute and no <source> child on purpose: this file is
+     13.21 MB, and CSS cannot stop a download. main.js attaches the source
+     only when the visitor is not on reduced motion, a narrow viewport, or a
+     metered connection. Otherwise the poster stands in. -->
+<div class="bg" id="bg">
+  <video class="bg-video" id="bg-video" muted loop playsinline
+    width="1920" height="1080" poster="assets/poster.webp"
+    data-src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260809_012548_ef22562c-c0ae-4816-ad9d-f8922af4e6a7.mp4"></video>
 </div>
 
 <div class="page">
