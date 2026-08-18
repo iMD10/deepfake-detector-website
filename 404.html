@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Not here. — 404</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#000000">
+
+<link rel="icon" href="assets/mark.svg" type="image/svg+xml">
+<link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="preload" href="fonts/DotGothic16-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<!-- The poster frame, not the hero video. An error page does not need to
+     download a megabyte of footage to look like the rest of the site. -->
+<div class="bg bg-still"></div>
+
+<div class="page">
+
+  <header class="header">
+    <a class="logo" href="/" aria-label="Home">
+      <img src="assets/logo.webp" width="52" height="52" alt="">
+    </a>
+
+    <nav class="nav-pill" aria-label="Primary">
+      <a href="/">Home</a>
+      <a href="/#doc-method">Method</a>
+      <a href="/#doc-results">Results</a>
+      <a href="/#doc-paper">Paper</a>
+    </nav>
+
+    <a class="signin" href="/#doc-paper">Read the paper</a>
+
+    <button class="burger" id="burger" aria-expanded="false" aria-controls="mobile-menu" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </header>
+
+  <main class="hero" id="main">
+
+    <h1 class="headline">
+      <span class="l1">Not here.</span>
+    </h1>
+
+    <p class="subhead">
+      That address does not exist. Nothing was moved or taken down — there was
+      never a page at this URL. The detector is on the front page.
+    </p>
+
+    <div class="cta-wrap">
+      <a class="cta" href="/">Upload an image</a>
+      <span class="cta-note">takes up to a minute</span>
+    </div>
+
+  </main>
+
+  <footer class="page-foot">
+    Built on <code>AnnaGao/FakeReasoning</code> by PRIS-CV. Our contribution is LoRA
+    adapters on their weights, 62.6M parameters, 0.799% of the model — not a model
+    trained from scratch. KAUST Academy, August 2026.
+  </footer>
+
+</div>
+
+<div class="overlay" id="overlay" hidden></div>
+
+<div class="sheet" id="mobile-menu" hidden>
+  <nav aria-label="Mobile">
+    <a href="/">Home</a>
+    <a href="/#doc-method">Method</a>
+    <a href="/#doc-results">Results</a>
+    <a href="/#doc-paper">Paper</a>
+    <a href="/#doc-paper" class="sheet-cta">Read the paper</a>
+  </nav>
+</div>
+
+<script>
+/* The burger only. main.js expects the upload machinery, the stages and the
+   document panel, none of which exist on this page. */
+(function () {
+  "use strict";
+  var burger = document.getElementById("burger");
+  var overlay = document.getElementById("overlay");
+  var sheet = document.getElementById("mobile-menu");
+
+  function setMenu(open) {
+    burger.setAttribute("aria-expanded", open ? "true" : "false");
+    overlay.hidden = !open;
+    sheet.hidden = !open;
+    document.body.classList.toggle("menu-open", open);
+    if (open) sheet.querySelector("a").focus();
+  }
+
+  burger.addEventListener("click", function () {
+    setMenu(burger.getAttribute("aria-expanded") !== "true");
+  });
+  overlay.addEventListener("click", function () { setMenu(false); });
+  window.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") setMenu(false);
+  });
+  window.addEventListener("resize", function () {
+    if (window.innerWidth > 720) setMenu(false);
+  });
+})();
+</script>
+</body>
+</html>

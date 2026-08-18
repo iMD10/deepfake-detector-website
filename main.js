@@ -275,6 +275,9 @@
     openDocAt(a.getAttribute("href"));
   });
 
+  /* 404.html links across as /#doc-method, so honour the hash on arrival. */
+  if (/^#doc-/.test(window.location.hash)) openDocAt(window.location.hash);
+
   document.getElementById("analyse").addEventListener("click", function () {
     clearError();
     fileInput.click();

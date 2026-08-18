@@ -411,6 +411,32 @@ body.doc-open{overflow:hidden}
   .headline{letter-spacing:-.09em;line-height:1.04}
 }
 
+/* ---------------- skip link ---------------- */
+.skip{
+  position:absolute;z-index:20;left:50%;transform:translateX(-50%) translateY(-120%);
+  display:grid;place-items:center;min-height:44px;padding:0 20px;
+  background:#fff;color:#000;text-decoration:none;
+  font-size:14px;font-weight:600;border-radius:0 0 12px 12px;
+  transition:transform .2s var(--ease);
+}
+/* :focus as well as :focus-visible — a skip link is invisible until focused,
+   so it must appear for every route into it, not only the heuristic one. */
+.skip:focus,.skip:focus-visible{
+  transform:translateX(-50%) translateY(0);
+  outline:2px solid var(--doc-accent);outline-offset:-4px;
+}
+
+/* ---------------- 404 ---------------- */
+.bg-still{background:#000 url("assets/poster.webp") center/cover no-repeat}
+.page-foot{
+  flex:0 0 auto;width:100%;max-width:720px;
+  margin-top:auto;padding-top:clamp(12px,2vh,18px);
+  font-size:clamp(11px,1.2vw,12.5px);line-height:1.6;
+  color:var(--muted);text-align:center;
+}
+.page-foot code{font-size:.95em;color:#b9b9b9}
+a.cta{display:inline-grid;place-items:center;min-height:44px;text-decoration:none}
+
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
   .anim,.stat,.stages{opacity:1!important;transform:none!important;filter:none!important}
