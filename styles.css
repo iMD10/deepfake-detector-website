@@ -1,7 +1,11 @@
+/* DotGothic16 — SIL Open Font License 1.1, see fonts/OFL.txt. Latin subset,
+   self-hosted, 10.5 KB. Replaces Bubbledot ICG, a commercial face that was
+   being hotlinked from db.onlinewebfonts.com without a licence. */
 @font-face{
-  font-family:"Geist Pixel Circle";
-  src:url("fonts/GeistPixel-Circle.woff2") format("woff2");
+  font-family:"DotGothic16";
+  src:url("fonts/DotGothic16-latin.woff2") format("woff2");
   font-weight:400;
+  font-style:normal;
   font-display:swap;
 }
 
@@ -17,7 +21,7 @@
   --trust-border:rgba(255,255,255,.4);
   --trust-text:#c4c2c3;
   --font-sans:"Inter","Segoe UI",system-ui,sans-serif;
-  --font-display:"BubbledotICG-FinePos","Geist Pixel Circle",monospace;
+  --font-display:"DotGothic16",ui-monospace,SFMono-Regular,Menlo,monospace;
 
   /* light reading surface */
   --doc-paper:#F7F8F8;
