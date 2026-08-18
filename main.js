@@ -6,9 +6,28 @@
 
   var REDUCED = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  /* Point this at your backend. Leave empty to run the page in demo mode,
-     which replays the verbatim 2026-08-17 run instead of calling a GPU. */
+  /* ------------------------------------------------------- the backend
+
+     Point API at the Modal web endpoint of fakereasoning-api. Modal serves
+     these as https://<workspace>--<app>-<function>.modal.run, so it will
+     look something like:
+
+       var API = "https://kaust-academy--fakereasoning-api-analyse.modal.run";
+
+     That is the only edit this file needs. Leave it empty and the page runs
+     in demo mode, replaying the verbatim 2026-08-17 run instead of spending
+     GPU time — keep that path working, it is how the site gets reviewed.
+
+     The request is multipart: `image` is the file, `models` selects which
+     checkpoints answer. The timeout matches FR_IDLE_TIMEOUT=300 on the
+     backend, because a visitor arriving after a quiet five minutes pays for
+     a container start and 26.8 GB of weights before any inference begins. */
   var API = "";
+  var MODELS = "both";
+  var API_TIMEOUT_MS = 300000;
+
+  var RETRY_HINT = " The models scale to zero after five idle minutes, so a cold " +
+    "start can take up to two minutes. Try once more.";
 
   /* The paper has no public URL yet. While this is empty, the Paper links open
      the document panel at the attribution note. Set it and they become
@@ -258,16 +277,64 @@
     if (data.truncated) document.getElementById("flag").hidden = false;
   }
 
-  function openDoc(file) {
+  /* Shown when the backend answered, but not for this model. Better than
+     leaving the other column's prose from the previous run standing. */
+  function paintMissing(which) {
+    var say = document.getElementById(which === "official" ? "say-of" : "say-ft");
+    var verdict = document.getElementById(which === "official" ? "v-of" : "v-ft");
+    var ms = document.querySelector('.model[data-model="' + which + '"] .ms');
+    var p = document.createElement("p");
+    p.textContent = "No answer came back from this model.";
+    say.textContent = "";
+    say.appendChild(p);
+    verdict.textContent = "—";
+    verdict.classList.remove("real");
+    /* Clear the timing too. A 9.9s next to "no answer" reads as a measurement
+       of something that never happened. */
+    if (ms) ms.textContent = "";
+  }
+
+  /* Every real run starts from a clean panel. A verdict or a truncation flag
+     left over from the previous image is worse than no answer at all. Demo
+     mode never calls this: its prose is the recorded run, written in markup. */
+  function resetPanel() {
+    document.getElementById("flag").hidden = true;
+    ["ft", "of"].forEach(function (k) {
+      var v = document.getElementById("v-" + k);
+      v.textContent = "";
+      v.classList.remove("real");
+      document.getElementById("say-" + k).textContent = "";
+    });
+  }
+
+  /* The exhibit caption. This used to write the filename into the <dt> that
+     labels the size row, and replace the filename <dd> with the literal
+     string "file". Address the <dd> elements directly. Anything not known —
+     demo mode has no response — is left as the markup had it. */
+  function setMeta(file, image) {
+    var dds = document.getElementById("doc-meta").getElementsByTagName("dd");
+    if (file && dds[0]) dds[0].textContent = file.name;
+    if (image && image.width && dds[1]) {
+      dds[1].textContent = image.width + " × " + image.height +
+        (image.format ? " · " + image.format : "");
+    }
+    if (image && dds[2]) {
+      dds[2].textContent = new Date().toLocaleDateString("en-GB",
+        { day: "numeric", month: "short", year: "numeric" });
+    }
+  }
+
+  var exhibitUrl = null;
+
+  function openDoc(file, image) {
     if (file) {
       var img = document.getElementById("doc-img");
-      var ph = document.getElementById("doc-ph");
-      img.src = URL.createObjectURL(file);
+      if (exhibitUrl) URL.revokeObjectURL(exhibitUrl);
+      exhibitUrl = URL.createObjectURL(file);
+      img.src = exhibitUrl;
       img.hidden = false;
-      ph.hidden = true;
-      var meta = document.getElementById("doc-meta");
-      meta.children[1].textContent = "file";
-      meta.children[1].nextElementSibling.textContent = file.name;
+      document.getElementById("doc-ph").hidden = true;
+      setMeta(file, image);
     }
     doc.hidden = false;
     document.body.classList.add("doc-open");
@@ -279,6 +346,91 @@
     doc.hidden = true;
     document.body.classList.remove("doc-open");
     resetStages();
+  }
+
+  /* Two response shapes are in play. main.js was written against an envelope
+     keyed by model; docs/model-contract.md documents a single flat result.
+     Rather than guess, accept both — and a list, which is the third obvious
+     way to return two answers. A flat result is routed by model_revision,
+     the only field that says which checkpoint replied. */
+  function normalise(json) {
+    var out = { finetune: null, official: null };
+
+    function place(result) {
+      if (!result || typeof result !== "object") return;
+      var rev = String(result.model_revision || "");
+      if (/^finetun/i.test(rev)) out.finetune = result;
+      else if (/^official/i.test(rev)) out.official = result;
+    }
+
+    if (json && (json.finetune || json.official)) {
+      out.finetune = json.finetune || null;
+      out.official = json.official || null;
+      return out;
+    }
+    if (Array.isArray(json)) { json.forEach(place); return out; }
+    if (json && Array.isArray(json.results)) { json.results.forEach(place); return out; }
+    place(json);
+    return out;
+  }
+
+  /* Say what actually went wrong. "Failed to fetch" sends someone looking at
+     the model when the endpoint is misspelt. */
+  function failureFor(status) {
+    if (status === 404) return { msg: "No endpoint at that address (404). Check API in main.js.", config: true };
+    if (status === 401 || status === 403) return { msg: "The backend refused the request (" + status + ").", config: true };
+    if (status === 405) return { msg: "The endpoint rejected a POST (405). Check API in main.js.", config: true };
+    if (status === 413) return { msg: "The backend rejected the image as too large (413).", config: true };
+    if (status === 422) return { msg: "The backend could not read that image (422).", config: true };
+    if (status === 429) return { msg: "The backend is rate limiting (429).", config: false };
+    if (status >= 500) return { msg: "The backend errored (" + status + ").", config: false };
+    return { msg: "The backend returned " + status + ".", config: false };
+  }
+
+  function callBackend(file) {
+    var body = new FormData();
+    body.append("image", file);
+    body.append("models", MODELS);
+
+    var controller = window.AbortController ? new AbortController() : null;
+    var timedOut = false;
+    var timer = setTimeout(function () {
+      timedOut = true;
+      if (controller) controller.abort();
+    }, API_TIMEOUT_MS);
+
+    var opts = { method: "POST", body: body };
+    if (controller) opts.signal = controller.signal;
+
+    function done(v) { clearTimeout(timer); return v; }
+
+    return fetch(API, opts).then(function (r) {
+      if (!r.ok) {
+        var f = failureFor(r.status);
+        return r.text().catch(function () { return ""; }).then(function (body) {
+          done();
+          var err = new Error(f.msg);
+          err.config = f.config;
+          err.detail = String(body).slice(0, 300);
+          throw err;
+        });
+      }
+      return r.json().then(done, function () {
+        done();
+        var err = new Error("The backend replied with something that is not JSON.");
+        err.config = true;
+        throw err;
+      });
+    }, function (e) {
+      done();
+      if (timedOut || e.name === "AbortError") {
+        throw new Error("No answer in five minutes, so the request was given up on.");
+      }
+      var err = new Error("The request never reached the backend. It may be offline, " +
+        "or blocking this origin with CORS.");
+      err.config = true;
+      throw err;
+    });
   }
 
   document.getElementById("doc-close").addEventListener("click", closeDoc);
@@ -332,6 +484,9 @@
 
   fileInput.addEventListener("change", function () {
     var file = fileInput.files && fileInput.files[0];
+    /* Clear it immediately, or picking the same file twice fires no change
+       event and the second attempt looks like a dead button. */
+    fileInput.value = "";
     if (!file) return;
 
     if (!/^image\/(png|jpeg|webp)$/.test(file.type)) {
@@ -348,29 +503,34 @@
 
     if (!API) {
       /* Demo mode: hold the wait so the state can be reviewed, then show the
-         verbatim run. Replace API above to call the real backend. */
-      setTimeout(function () { stop(); openDoc(file); }, REDUCED ? 400 : 6000);
+         verbatim run. Set API above to call the real backend. */
+      setTimeout(function () { stop(); openDoc(file, null); }, REDUCED ? 400 : 6000);
       return;
     }
 
-    var body = new FormData();
-    body.append("image", file);
-    body.append("models", "both");
-
-    fetch(API, { method: "POST", body: body })
-      .then(function (r) {
-        if (!r.ok) throw new Error("The backend returned " + r.status + ".");
-        return r.json();
-      })
+    callBackend(file)
       .then(function (json) {
+        var models = normalise(json);
+        if (!models.finetune && !models.official) {
+          var err = new Error("The backend replied, but with no result this page could read.");
+          err.config = true;
+          throw err;
+        }
+
         stop();
-        if (json.finetune) paintModel("finetune", json.finetune);
-        if (json.official) paintModel("official", json.official);
-        openDoc(file);
+        resetPanel();
+
+        if (models.finetune) paintModel("finetune", models.finetune);
+        else paintMissing("finetune");
+        if (models.official) paintModel("official", models.official);
+        else paintMissing("official");
+
+        openDoc(file, (models.official || models.finetune).image);
       })
       .catch(function (e) {
         resetStages();
-        showError(e.message + " The models scale to zero after five idle minutes, so a cold start can take up to two minutes. Try once more.");
+        if (e.detail) console.error("Backend said:", e.detail);
+        showError(e.message + (e.config ? "" : RETRY_HINT));
       });
   });
 
