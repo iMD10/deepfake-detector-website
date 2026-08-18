@@ -31,13 +31,13 @@
     </a>
 
     <nav class="nav-pill" aria-label="Primary">
-      <a href="#" class="active" aria-current="page">Home</a>
-      <a href="#method">Method</a>
-      <a href="#results">Results</a>
-      <a href="#paper">Paper</a>
+      <a href="/" class="active" aria-current="page">Home</a>
+      <a href="#doc-method">Method</a>
+      <a href="#doc-results">Results</a>
+      <a href="#doc-paper" data-paper>Paper</a>
     </nav>
 
-    <a class="signin" href="#paper">Read the paper</a>
+    <a class="signin" href="#doc-paper" data-paper>Read the paper</a>
 
     <button class="burger" id="burger" aria-expanded="false" aria-controls="mobile-menu" aria-label="Menu">
       <span></span><span></span><span></span>
@@ -115,11 +115,11 @@
 
 <div class="sheet" id="mobile-menu" hidden>
   <nav aria-label="Mobile">
-    <a href="#" class="active" aria-current="page">Home</a>
-    <a href="#method">Method</a>
-    <a href="#results">Results</a>
-    <a href="#paper">Paper</a>
-    <a href="#paper" class="sheet-cta">Read the paper</a>
+    <a href="/" class="active" aria-current="page">Home</a>
+    <a href="#doc-method">Method</a>
+    <a href="#doc-results">Results</a>
+    <a href="#doc-paper" data-paper>Paper</a>
+    <a href="#doc-paper" class="sheet-cta" data-paper>Read the paper</a>
   </nav>
 </div>
 
@@ -142,7 +142,7 @@
         </dl>
       </div>
 
-      <div class="doc-compare">
+      <div class="doc-compare" id="doc-results">
 
         <article class="model" data-model="finetune">
           <header>
@@ -182,10 +182,11 @@
     <p class="flag" id="flag" hidden>The model reached its 512-token limit and stopped mid-sentence.
       What you see above is incomplete.</p>
 
-    <p class="doc-foot">No confidence score is produced, and none is shown &mdash; the verdict is parsed from
+    <p class="doc-foot" id="doc-method">No confidence score is produced, and none is shown &mdash; the verdict is parsed from
       the model's own closing sentence, which is removed above so it is not stated twice. There is no
-      heatmap: this model's evidence is its prose.<br><br>
-      Built on <code>AnnaGao/FakeReasoning</code> by PRIS-CV. Our contribution is LoRA adapters on their
+      heatmap: this model's evidence is its prose.</p>
+
+    <p class="doc-foot" id="doc-paper">Built on <code>AnnaGao/FakeReasoning</code> by PRIS-CV. Our contribution is LoRA adapters on their
       weights, 62.6M parameters, 0.799% of the model &mdash; not a model trained from scratch.
       KAUST Academy, August 2026.</p>
 

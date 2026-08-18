@@ -10,6 +10,11 @@
      which replays the verbatim 2026-08-17 run instead of calling a GPU. */
   var API = "";
 
+  /* The paper has no public URL yet. While this is empty, the Paper links open
+     the document panel at the attribution note. Set it and they become
+     ordinary external links, no other change required. */
+  var PAPER_URL = "";
+
   /* ---------------------------------------------------------------- stats */
 
   function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
@@ -243,6 +248,32 @@
   }
 
   document.getElementById("doc-close").addEventListener("click", closeDoc);
+
+  /* The document panel is the only other surface this site has, so the nav
+     points into it rather than at sections that do not exist. Open it, then
+     bring the requested part into view. */
+  function openDocAt(hash) {
+    var target = document.querySelector(hash);
+    if (!target) return;
+    openDoc(null);
+    target.scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "start" });
+  }
+
+  if (PAPER_URL) {
+    Array.prototype.forEach.call(document.querySelectorAll("[data-paper]"), function (a) {
+      a.href = PAPER_URL;
+      a.target = "_blank";
+      a.rel = "noopener";
+    });
+  }
+
+  document.addEventListener("click", function (e) {
+    var a = e.target.closest && e.target.closest('a[href^="#doc-"]');
+    if (!a) return;
+    e.preventDefault();
+    setMenu(false);
+    openDocAt(a.getAttribute("href"));
+  });
 
   document.getElementById("analyse").addEventListener("click", function () {
     clearError();
