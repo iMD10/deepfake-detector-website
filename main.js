@@ -38,35 +38,65 @@
   /* ------------------------------------------------------- hero video
 
      The current file is 13.21 MB against a 1.5 MB budget, so it is opt-in
-     rather than opt-out. Three refusals, each for its own reason:
+     rather than opt-out. Two refusals, each an explicit signal from the
+     visitor rather than a guess made on their behalf:
 
        reduced motion  the DoD says fall back to the poster, and an autoplay
                        attribute cannot be cancelled from CSS
-       narrow viewport phone data, and the video is cropped to a sliver there
        Save-Data       the visitor has asked, in a header, not to be sent this
+
+     A third refusal on max-width 720px used to sit here. It was removed: the
+     landing read as a flat black rectangle on every phone, which is most of
+     the demo-day traffic. The 13.21 MB still lands on phone data, and that
+     number is the thing to fix, not the playback.
 
      In every refused case the poster carries the page on its own. */
   (function heroVideo() {
     var video = document.getElementById("bg-video");
     if (!video) return;
 
-    var narrow = window.matchMedia("(max-width: 720px)").matches;
+    var bg = document.getElementById("bg");
     var conn = navigator.connection || {};
     var metered = conn.saveData === true;
 
-    if (REDUCED || narrow || metered) {
+    function fallBackToPoster() {
+      if (!video.parentNode) return;
       video.remove();
-      document.getElementById("bg").classList.add("bg-still");
+      bg.classList.add("bg-still");
+    }
+
+    if (REDUCED || metered) {
+      fallBackToPoster();
       return;
     }
+
+    /* A network or decode failure leaves an empty element behind, and the
+       poster attribute stops applying once the media errors. Hand the frame
+       back to the CSS still so the landing is never a black rectangle. */
+    video.addEventListener("error", fallBackToPoster);
 
     var source = document.createElement("source");
     source.type = "video/mp4";
     source.src = video.dataset.src;
+    source.addEventListener("error", fallBackToPoster);
     video.appendChild(source);
     video.load();
-    var p = video.play();
-    if (p && p.catch) p.catch(function () { /* autoplay refused; poster stays */ });
+
+    /* iOS plays a muted playsinline video without a gesture, but refuses in
+       Low Power Mode. Retry once on the first touch, then stop asking. */
+    function attempt() {
+      var p = video.play();
+      if (p && p.catch) p.catch(waitForGesture);
+    }
+    function waitForGesture() {
+      document.addEventListener("touchstart", once, { once: true, passive: true });
+      document.addEventListener("click", once, { once: true });
+    }
+    function once() {
+      var p = video.play();
+      if (p && p.catch) p.catch(function () { /* refused twice; poster stays */ });
+    }
+    attempt();
   })();
 
   /* ---------------------------------------------------------------- stats */
