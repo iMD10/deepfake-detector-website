@@ -216,7 +216,7 @@ h2.sec{font-family:var(--font-mono);font-size:12px;letter-spacing:.1em;color:var
 
   <div class="metrics">
     <div class="metric"><div class="glyph">%</div><div class="val">92.5%</div><div class="cap">Accuracy on ten unseen generators, unchanged by fine-tuning</div></div>
-    <div class="metric"><div class="glyph">+</div><div class="val">+0.520</div><div class="cap">Class separation, up from +0.274</div></div>
+    <div class="metric"><div class="glyph">+</div><div class="val">+0.699</div><div class="cap">Class separation, up from +0.400</div></div>
     <div class="metric"><div class="glyph">#</div><div class="val">0.799%</div><div class="cap">Share of the model retrained</div></div>
     <div class="metric"><div class="glyph">~</div><div class="val">23s</div><div class="cap">Mean seconds per image, warm</div></div>
   </div>
@@ -294,7 +294,7 @@ h2.sec{font-family:var(--font-mono);font-size:12px;letter-spacing:.1em;color:var
       <b>Scale</b> hero clamp(30&ndash;68) &middot; verdict clamp(19&ndash;25) &middot; body 16 &middot; label 11.<br>
       <b>Radius</b> 2px on controls, 0 everywhere else. <b>Rules</b> 1px hairline, never a shadow.<br>
       <b>Verdict weight is epistemic.</b> A fake verdict renders solid white and enclosed; a real verdict
-      renders dashed and muted, because measured fake recall is 51.7% against 100% real recall.
+      renders dashed and muted, because measured fake recall is 70.0% against 100% real recall.
     </p>
   </section>
 
@@ -311,7 +311,7 @@ h2.sec{font-family:var(--font-mono);font-size:12px;letter-spacing:.1em;color:var
     slot.textContent=fake?'This image is fake.':'This image is real.';
     caveat.textContent=fake
       ?'Verdict parsed from the last match of /this image is (real|fake)/. No confidence score is emitted.'
-      :'A real verdict is the weaker of the two: this model answers real 70% of the time and its fake recall is 51.7%.';
+      :'A real verdict is the weaker of the two: fake recall is 70.0% against 100% real recall, so the model misses fakes more often than it doubts photographs.';
     fake=!fake;
   });
 })();

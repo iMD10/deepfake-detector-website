@@ -40,7 +40,7 @@ Headline: `Not a score.` / `An argument.`
 
 Subhead: "A score of 0.83 tells you nothing to check, cite, or appeal. Upload a photograph and two models each write what they found in it."
 
-Statistics — these four, exactly, no others: 92.5% accuracy on ten unseen generators · +0.520 class separation, from +0.274 · 0.799% share of the model retrained · 16s warm inference per image.
+Statistics — these four, exactly, no others: 92.5% accuracy on ten unseen generators · +0.699 class separation, from +0.400 · 0.799% share of the model retrained · 16s warm inference per image.
 
 The model text shown in the result panel is verbatim output from the 2026-08-17 run. It is quoted, not authored. See `docs/model-contract.md`.
 

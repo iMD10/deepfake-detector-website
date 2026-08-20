@@ -24,8 +24,9 @@ built and then deleted for being fragile and unfaithful to the model.
 ## Results
 
 - 92.5% accuracy across ten unseen generators, unchanged by fine-tuning
-- Class separation +0.520, up from +0.274
-- In-distribution accuracy 64.0% → 72.0%
+- Class separation +0.699, up from +0.400
+- In-distribution accuracy 70.0% → 85.0% (n=20, balanced; 14/20 → 17/20 correct)
+- Out-of-distribution explanation diversity 100%, largest duplicate cluster 1
 - 0.799% of the model retrained (62.6M LoRA parameters)
 - Warm inference 9.9s (fine-tune) and 15.6s (original)
 
@@ -34,9 +35,15 @@ The site says so rather than claiming to be instant.
 
 ### The known weakness, stated plainly
 
-Fake recall is 51.7% and real recall is 100.0%; the model answers "real" about
-70% of the time. A *fake* verdict is therefore much stronger evidence than a
-*real* one. The site says this next to the verdict, and so does this README.
+Fine-tuning bought nothing on the fake class: fake recall is 70.0% before and
+70.0% after, so the model still misses about three fakes in every ten. The
+entire gain came from correcting genuine photographs, where recall went from
+70.0% to 100.0%. A *fake* verdict is therefore stronger evidence than a *real*
+one. The site says this next to the verdict, and so does this README.
+
+These are small samples. At n=20 one image is five percentage points, the
++15-point gain is three additional correct predictions, and the fine-tuned
+checkpoint comes from a single training run with no seed variance.
 
 ## Running it
 

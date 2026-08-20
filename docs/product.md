@@ -47,7 +47,7 @@ Showing both, and being straight about the lineage, is the point. The team's con
 - Claim customers, partners, or enterprise adoption.
 - Display a metric that is not in `CLAUDE.md`.
 - Present the official model's prose as a fixed or canonical answer.
-- Hide that fake recall is 51.7%.
+- Hide that fake recall is 70.0%, unchanged by fine-tuning.
 
 ## Non-goals for v1
 
