@@ -39,6 +39,11 @@
 }
 
 *{box-sizing:border-box}
+/* The hidden attribute only sets display:none at the UA level, so any rule
+   that sets display beats it. .cta-wrap is display:flex and .mat span is
+   display:grid, and both are toggled with .hidden from JS, so both were
+   staying on screen. This makes hidden mean hidden. */
+[hidden]{display:none!important}
 html,body{margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{
@@ -352,7 +357,10 @@ body.menu-open{overflow:hidden}
   padding:clamp(16px,2.8vw,30px);
 }
 .mat{background:var(--doc-mat);padding:14px;border-radius:3px}
-.mat img{width:100%;display:block;border-radius:2px}
+/* height:auto or the width/height attributes hold the box at its native
+   height while CSS stretches the width, which distorts the exhibit. The
+   attributes stay so the aspect ratio is known before load, for CLS. */
+.mat img{width:100%;height:auto;display:block;border-radius:2px}
 .mat span{
   display:grid;place-items:center;aspect-ratio:3/2;background:#D2D4D5;
   font-size:11px;color:#8B9095;letter-spacing:.08em;
@@ -361,6 +369,14 @@ body.menu-open{overflow:hidden}
   font-size:11.5px;color:var(--doc-muted)}
 .meta dt{letter-spacing:.06em;text-transform:uppercase;font-size:10.5px;padding-top:1px}
 .meta dd{margin:0}
+
+/* Ground truth for the worked example. Stated plainly under the exhibit
+   because a comparison where the reader cannot tell who was right is not a
+   comparison. Hidden by main.js for a visitor's own upload. */
+.truth{
+  margin:10px 0 0;font-size:11.5px;line-height:1.6;color:var(--doc-muted);
+  padding-top:9px;border-top:1px solid var(--doc-line);
+}
 
 .doc-compare{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(20px,3vw,32px)}
 .model{min-width:0}

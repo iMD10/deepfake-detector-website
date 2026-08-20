@@ -31,10 +31,9 @@
   var RETRY_HINT = " The models scale to zero after five idle minutes, so a cold " +
     "start can take up to two minutes. Try once more.";
 
-  /* The paper has no public URL yet. While this is empty, the Paper links open
-     the document panel at the attribution note. Set it and they become
-     ordinary external links, no other change required. */
-  var PAPER_URL = "";
+  /* The report, served from this origin. Links marked data-paper point here;
+     the nav item still scrolls to the Paper section. */
+  var PAPER_URL = "assets/kasp_project_report.pdf";
 
   /* ------------------------------------------------------- hero video
 
@@ -303,6 +302,10 @@
      mode never calls this: its prose is the recorded run, written in markup. */
   function resetPanel() {
     document.getElementById("flag").hidden = true;
+    /* The worked example ships with its ground truth stated. For a visitor's
+       own photograph there is no ground truth to state, so it goes. */
+    var truth = document.getElementById("exhibit-truth");
+    if (truth) truth.hidden = true;
     ["ft", "of"].forEach(function (k) {
       var v = document.getElementById("v-" + k);
       v.textContent = "";
