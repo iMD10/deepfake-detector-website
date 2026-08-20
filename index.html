@@ -90,7 +90,7 @@
       "@type": "CreativeWork",
       "@id": "https://deepfake-detector-website.vercel.app/#model",
       "name": "Fine-tuned FakeReasoning adapters",
-      "description": "LoRA adapters trained on AnnaGao/FakeReasoning: 62,586,880 trainable parameters, 0.799% of the model. Out-of-distribution accuracy across ten unseen generators is 92.5%, unchanged by fine-tuning; class separation rises from +0.274 to +0.520.",
+      "description": "LoRA adapters trained on AnnaGao/FakeReasoning: 62,586,880 trainable parameters, 0.799% of the model. Out-of-distribution accuracy across ten unseen generators is 92.5%, unchanged by fine-tuning; class separation rises from +0.400 to +0.699.",
       "isBasedOn": "https://huggingface.co/AnnaGao/FakeReasoning",
       "creator": { "@id": "https://deepfake-detector-website.vercel.app/#team" },
       "dateCreated": "2026-08-17",
@@ -186,8 +186,8 @@
     </div>
     <div class="stat" style="--d:.58s">
       <div class="glyph">+</div>
-      <div class="val" data-target="0.520" data-suffix="" data-dec="3">0.000</div>
-      <div class="cap">Class separation, from +0.274</div>
+      <div class="val" data-target="0.699" data-suffix="" data-dec="3">0.000</div>
+      <div class="cap">Class separation, from +0.400</div>
     </div>
     <div class="stat" style="--d:.66s">
       <div class="glyph">#</div>
@@ -291,7 +291,8 @@
     <div class="sec-in">
       <h2 id="results-h">Results</h2>
       <p class="lede">Fine-tuning did not make the model more accurate on unseen generators. It
-        made the model separate the two classes further apart, and it moved the prior.</p>
+        made it separate the two classes further apart, and it corrected genuine photographs
+        without costing anything on the fake ones.</p>
 
       <div class="fig-wrap">
         <table class="fig">
@@ -299,33 +300,55 @@
             <tr><th scope="col">Metric</th><th scope="col">Base</th><th scope="col">Fine-tuned</th></tr>
           </thead>
           <tbody>
-            <tr><th scope="row">In-distribution accuracy (n=50)</th><td>64.0%</td><td>72.0%</td></tr>
-            <tr><th scope="row">Class separation</th><td>+0.274</td><td>+0.520</td></tr>
+            <tr><th scope="row">In-distribution accuracy (n=20)</th><td>70.0%</td><td>85.0%</td></tr>
+            <tr><th scope="row">Class separation</th><td>+0.400</td><td>+0.699</td></tr>
+            <tr><th scope="row">Recall, real</th><td>70.0%</td><td>100.0%</td></tr>
+            <tr><th scope="row">Recall, fake</th><td>70.0%</td><td>70.0%</td></tr>
             <tr><th scope="row">Out-of-distribution accuracy, 10 unseen generators</th><td>92.5%</td><td>92.5%</td></tr>
-            <tr><th scope="row">Recall, real</th><td>61.9%</td><td>100.0%</td></tr>
-            <tr><th scope="row">Recall, fake</th><td>65.5%</td><td>51.7%</td></tr>
-            <tr><th scope="row">Answers &ldquo;real&rdquo;</th><td>46.0%</td><td>70.0%</td></tr>
-            <tr><th scope="row">Explanation diversity, in-distribution</th><td>94.0%</td><td>80.0%</td></tr>
+            <tr><th scope="row">Explanation diversity, out-of-distribution</th><td>100%</td><td>100%</td></tr>
+            <tr><th scope="row">Largest duplicate cluster</th><td>1</td><td>1</td></tr>
           </tbody>
-          <caption>KAUST Academy report, 17 August 2026.</caption>
+          <caption>In-distribution is 20 held-out FakeClue images, balanced 10 real and 10 fake:
+            14/20 correct before, 17/20 after. Out-of-distribution is 40 images, four from each of
+            ten generators the adaptation data never contained.</caption>
         </table>
       </div>
 
       <h3>Per generator, four images each</h3>
-      <p>DALL&middot;E 3 100% &middot; GigaGAN 100% &middot; GPT-4o 100% &middot; DeepFloyd IF 100%
-        &middot; PixArt 100% &middot; Stable Diffusion 100% &middot; StyleGAN-XL 100% &middot;
-        Flux 75% &middot; Kandinsky 75% &middot; Midjourney 75%.</p>
+      <div class="fig-wrap">
+        <table class="fig">
+          <thead>
+            <tr><th scope="col">Generator</th><th scope="col">Base</th><th scope="col">Fine-tuned</th></tr>
+          </thead>
+          <tbody>
+            <tr><th scope="row">DALL&middot;E 3</th><td>100%</td><td>100%</td></tr>
+            <tr><th scope="row">DeepFloyd IF</th><td>100%</td><td>100%</td></tr>
+            <tr><th scope="row">Flux</th><td>100%</td><td>75%</td></tr>
+            <tr><th scope="row">GigaGAN</th><td>100%</td><td>100%</td></tr>
+            <tr><th scope="row">GPT-4o</th><td>100%</td><td>100%</td></tr>
+            <tr><th scope="row">Kandinsky</th><td>100%</td><td>75%</td></tr>
+            <tr><th scope="row">Midjourney</th><td>75%</td><td>75%</td></tr>
+            <tr><th scope="row">PixArt</th><td>100%</td><td>100%</td></tr>
+            <tr><th scope="row">Stable Diffusion</th><td>75%</td><td>100%</td></tr>
+            <tr><th scope="row">StyleGAN-XL</th><td>75%</td><td>100%</td></tr>
+          </tbody>
+          <caption>Four movements of 25 points each, netting to zero. Two generators lost a single
+            image and two gained one, which is what an unchanged 92.5% mean is made of.</caption>
+        </table>
+      </div>
 
-      <p class="note warn"><b>The weakness stays on the page.</b> Fake recall fell to 51.7% while
-        real recall reached 100.0%, and the fine-tune answers &ldquo;real&rdquo; 70% of the time. A
-        fake verdict from this model is therefore stronger evidence than a real one. That is said
-        next to the verdict itself, not hidden in a footnote.</p>
+      <p class="note warn"><b>The weakness stays on the page.</b> Fine-tuning did not improve fake
+        recall at all: it is 70.0% before and 70.0% after, so the model still misses about three
+        fakes in every ten. The whole gain came from correcting genuine photographs, where recall
+        went from 70.0% to 100.0%. A fake verdict from this model is therefore stronger evidence
+        than a real one, and that is said next to the verdict itself rather than hidden here.</p>
 
       <p class="note"><b>On quoting these numbers.</b> The accuracy point estimates come from small
-        samples and should not be quoted without that caveat. At n=50 in-distribution, one image is
-        two percentage points; each per-generator cell is four images, so one image is 25 points.
-        Class separation and the shift in the prior are the findings the authors consider robust
-        at this scale.</p>
+        samples and should not be quoted without that caveat. At n=20 in-distribution, one image is
+        five percentage points, and the whole +15-point gain is three additional correct
+        predictions; each per-generator cell is four images, so one image is 25 points. The
+        fine-tuned checkpoint comes from a single training run with no seed variance, and the
+        in-distribution explanation-diversity diagnostics were not recomputed on this subset.</p>
     </div>
   </section>
 
@@ -362,12 +385,14 @@
 
       <h3>What it reports</h3>
       <ul>
-        <li>Class separation widened from <b>+0.274 to +0.520</b> — the finding the authors
-          consider robust at this sample size.</li>
+        <li>Class separation nearly doubled, <b>+0.400 to +0.699</b> — the distance between
+          the class-conditional means, which moves whether or not a prediction crosses a threshold.</li>
         <li>Out-of-distribution accuracy across ten unseen generators held at <b>92.5%</b>,
-          unchanged by fine-tuning.</li>
-        <li>The prior moved: the model answers &ldquo;real&rdquo; 70% of the time against 46%
-          before, which is what drives real recall to 100% and fake recall down to 51.7%.</li>
+          unchanged by fine-tuning, and every one of the forty explanations was unique.</li>
+        <li>In-distribution accuracy rose <b>70.0% to 85.0%</b>, entirely by fixing real
+          photographs: real recall 70.0% to 100.0%, fake recall unchanged at 70.0%.</li>
+        <li>Reading the probability at the verdict token rather than the greedy word put the best
+          operating point at <b>t = 0.98</b>, not the 0.50 a naive reading assumes.</li>
         <li>Trainable parameters <b>62,586,880</b>, 0.799% of the model, with both vision towers
           and the fusion stack frozen and verified bit-identical.</li>
       </ul>
@@ -441,8 +466,8 @@
             with natural light interactions.</p>
           </div>
           <p class="verdict"><b id="v-ft">Fake</b><span>greedy decoding &middot; reproducible</span></p>
-          <p class="caveat">A fake verdict is the stronger of the two. Measured fake recall is 51.7%
-            against 100% real recall, so this model misses fakes more often than it doubts photographs.</p>
+          <p class="caveat">A fake verdict is the stronger of the two. Measured fake recall is 70.0%
+            against 100.0% real recall, so this model misses fakes more often than it doubts photographs.</p>
         </article>
 
         <article class="model" data-model="official">

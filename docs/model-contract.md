@@ -65,23 +65,33 @@ Do not use the word "real-time". "Takes up to a minute" is honest.
 
 From the KAUST Academy report, 17 August 2026.
 
+Superseded 2026-08-20 by the updated evaluation in `assets/kasp_project_report.pdf`.
+The table below is Tables 4 and 5 of that report.
+
 | Metric | Base | Fine-tuned |
 |---|---|---|
-| In-distribution accuracy (n=50) | 64.0% | 72.0% |
-| Class separation | +0.274 | +0.520 |
+| In-distribution accuracy (n=20) | 70.0% | 85.0% |
+| Class separation | +0.400 | +0.699 |
+| Recall, real | 70.0% | 100.0% |
+| Recall, fake | 70.0% | 70.0% |
 | Out-of-distribution accuracy, 10 unseen generators | 92.5% | 92.5% |
-| Recall, real | 61.9% | 100.0% |
-| Recall, fake | 65.5% | 51.7% |
-| Answers "real" | 46.0% | 70.0% |
-| Explanation diversity, in-distribution | 94.0% | 80.0% |
+| Explanation diversity, out-of-distribution | 100% | 100% |
+| Largest duplicate cluster | 1 | 1 |
+
+In-distribution explanation diversity was **not recomputed** on the 20-image subset; the
+old 94.0% -> 80.0% figures belong to the superseded n=50 run and must not be mixed with
+these. The report's Conclusion still quotes that run's deltas and contradicts Table 4.
 
 Trainable parameters: 62,586,880 — 0.799% of the model. Both vision towers and the whole fusion stack frozen and bit-identical before and after training.
 
-Per-generator, four images each: DALL·E 3 100%, GigaGAN 100%, GPT-4o 100%, DeepFloyd IF 100%, PixArt 100%, Stable Diffusion 100%, StyleGAN-XL 100%, Flux 75%, Kandinsky 75%, Midjourney 75%.
+Per-generator, four images each, base -> fine-tuned: DALL·E 3 100->100, DeepFloyd IF 100->100,
+Flux 100->75, GigaGAN 100->100, GPT-4o 100->100, Kandinsky 100->75, Midjourney 75->75,
+PixArt 100->100, Stable Diffusion 75->100, StyleGAN-XL 75->100. Four single-image movements
+of 25 points each, netting to zero.
 
-**Do not quote the accuracy point estimates externally without confidence intervals.** The paper's own limitations section says so: n=50 in-distribution means one image is two percentage points, and the ±25% per-generator cells are one image each. Separation and the prior shift are the findings the authors consider robust at this scale.
+**Do not quote the accuracy point estimates externally without confidence intervals.** The paper's own limitations section says so: n=20 in-distribution means one image is five percentage points, so the +15-point gain is three predictions, and the ±25% per-generator cells are one image each. It is also a single training run with no seed variance.
 
-**The weakness stays on the page.** Fake recall fell to 51.7% while real recall hit 100%, and the model answers "real" 70% of the time. A fake verdict is therefore stronger evidence than a real one, and the site says so next to the verdict rather than in a footnote.
+**The weakness stays on the page.** Fine-tuning did not move fake recall at all -- 70.0% before and after -- while real recall went 70.0% -> 100.0%. Roughly three fakes in ten are still missed. A fake verdict is therefore stronger evidence than a real one, and the site says so next to the verdict rather than in a footnote.
 
 ## Known environment bug
 

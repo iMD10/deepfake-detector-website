@@ -78,14 +78,19 @@ The fine-tune's public name is not decided yet. Until the team confirms it, the 
 
 Only these. Do not add, round, or extrapolate.
 
+Superseded 2026-08-20 by the updated evaluation in `assets/kasp_project_report.pdf` (Tables 4 and 5). The n=50 run that produced 64.0/72.0, +0.274/+0.520 and fake recall 51.7% is no longer the reported result.
+
 - 92.5% accuracy across ten unseen generators, unchanged by fine-tuning
-- +0.520 class separation, up from +0.274
+- +0.699 class separation, up from +0.400
 - 0.799% of the model retrained
 - 9.9s / 15.6s warm inference
-- In-distribution accuracy 64.0% → 72.0%
-- Fake recall 51.7%, real recall 100.0%, answers "real" 70% of the time
+- In-distribution accuracy 70.0% → 85.0%, on n=20 (10 real, 10 fake), 14/20 → 17/20
+- Real recall 70.0% → 100.0%; fake recall unchanged at 70.0%
+- Out-of-distribution explanation diversity 100%, largest duplicate cluster 1
 
-That last line is a real weakness and it stays on the page. A fake verdict is stronger evidence than a real one, and the site says so next to the verdict.
+That last pair is a real weakness and it stays on the page. Fine-tuning bought nothing on the fake class; the whole gain was correcting real photographs. A fake verdict is therefore stronger evidence than a real one, and the site says so next to the verdict.
+
+The paper's Conclusion (§8) still describes the superseded run — "13.8 points of fake recall", "38.1 points of real recall", 14 points of diversity. Those are 65.5→51.7, 61.9→100.0 and 94→80 from the n=50 evaluation, and they contradict Table 4. Use the tables.
 
 ## Definition of done
 

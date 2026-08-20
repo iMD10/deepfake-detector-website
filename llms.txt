@@ -27,21 +27,24 @@ parameters, 0.799% of the model. This is not a model trained from scratch.
 ## Measured results
 
 - 92.5% accuracy across ten unseen generators, unchanged by fine-tuning
-- Class separation +0.520, up from +0.274
-- In-distribution accuracy 64.0% to 72.0%
-- Fake recall 51.7%, real recall 100.0%
-- The fine-tune answers "real" 70% of the time
+- Class separation +0.699, up from +0.400
+- In-distribution accuracy 70.0% to 85.0% (n=20)
+- Real recall 70.0% to 100.0%; fake recall unchanged at 70.0%
+- Out-of-distribution explanation diversity 100%, largest duplicate cluster 1
 
-The accuracy point estimates come from small samples — n=50
-in-distribution, four images per generator — and should not be quoted
-without that caveat. Class separation and the prior shift are the findings
-the authors consider robust at this scale.
+The accuracy point estimates come from small samples — 20 images
+in-distribution, four per generator out of distribution — and should not be
+quoted without that caveat. One in-distribution image is five percentage
+points, so the +15-point gain is three additional correct predictions. The
+fine-tuned checkpoint is a single training run with no seed variance.
 
 ## The known weakness
 
-Fake recall fell to 51.7% while real recall reached 100.0%. A fake verdict
-from this model is therefore stronger evidence than a real one. This is
-stated on the page next to the verdict, not hidden in a footnote.
+Fine-tuning did not improve fake recall at all: 70.0% before, 70.0% after,
+so roughly three fakes in ten are still missed. The entire gain came from
+correcting genuine photographs, where recall rose from 70.0% to 100.0%. A
+fake verdict from this model is therefore stronger evidence than a real
+one. This is stated on the page next to the verdict, not in a footnote.
 
 ## What the system does not produce
 
