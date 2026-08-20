@@ -5,4 +5,4 @@ Allow: /
 Disallow: /brand.html
 Disallow: /brand-light.html
 
-Sitemap: https://fakereasoning.example/sitemap.xml
+Sitemap: https://deepfake-detector-website.vercel.app/sitemap.xml

@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<!-- PLACEHOLDER DOMAIN. fakereasoning.example is IANA-reserved and will never
-     resolve. Every absolute URL below, and in sitemap.xml, robots.txt and
-     llms.txt, uses it. One find-and-replace once a domain is registered. -->
+<!-- The canonical origin. Every absolute URL below, and in sitemap.xml and
+     robots.txt, uses it, so a custom domain is one find-and-replace across
+     those three files plus a redirect from the vercel.app name. -->
 <title>Not a score. An argument. — AI image detection</title>
 <meta name="description" content="Upload a photograph and two vision-language models each write what they found in it. 92.5% accuracy on ten unseen generators. KAUST Academy, 2026.">
-<link rel="canonical" href="https://fakereasoning.example/">
+<link rel="canonical" href="https://deepfake-detector-website.vercel.app/">
 <meta name="theme-color" content="#000000">
 
 <link rel="icon" href="assets/mark.svg" type="image/svg+xml">
@@ -19,10 +19,10 @@
 <meta property="og:type" content="website">
 <meta property="og:locale" content="en_US">
 <meta property="og:site_name" content="Not a score. An argument.">
-<meta property="og:url" content="https://fakereasoning.example/">
+<meta property="og:url" content="https://deepfake-detector-website.vercel.app/">
 <meta property="og:title" content="Not a score. An argument.">
 <meta property="og:description" content="Upload a photograph and two vision-language models each write what they found in it. 92.5% accuracy on ten unseen generators. KAUST Academy, 2026.">
-<meta property="og:image" content="https://fakereasoning.example/assets/og.png">
+<meta property="og:image" content="https://deepfake-detector-website.vercel.app/assets/og.png">
 <meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -31,7 +31,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Not a score. An argument.">
 <meta name="twitter:description" content="Upload a photograph and two vision-language models each write what they found in it. 92.5% accuracy on ten unseen generators.">
-<meta name="twitter:image" content="https://fakereasoning.example/assets/og.png">
+<meta name="twitter:image" content="https://deepfake-detector-website.vercel.app/assets/og.png">
 <meta name="twitter:image:alt" content="Not a score. An argument. — a deepfake detector that answers in prose, from KAUST Academy.">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -50,10 +50,10 @@
   "@graph": [
     {
       "@type": "Organization",
-      "@id": "https://fakereasoning.example/#team",
+      "@id": "https://deepfake-detector-website.vercel.app/#team",
       "name": "KAUST Academy",
-      "url": "https://fakereasoning.example/",
-      "logo": "https://fakereasoning.example/assets/mark.svg",
+      "url": "https://deepfake-detector-website.vercel.app/",
+      "logo": "https://deepfake-detector-website.vercel.app/assets/mark.svg",
       "member": [
         { "@type": "Person", "name": "Muhannad Alfwazan" },
         { "@type": "Person", "name": "Abdulqader Alfawzan" },
@@ -65,20 +65,20 @@
     },
     {
       "@type": "WebSite",
-      "@id": "https://fakereasoning.example/#site",
-      "url": "https://fakereasoning.example/",
+      "@id": "https://deepfake-detector-website.vercel.app/#site",
+      "url": "https://deepfake-detector-website.vercel.app/",
       "name": "Not a score. An argument.",
       "description": "A detector for AI-generated images that answers in prose rather than with a probability.",
       "inLanguage": "en",
-      "publisher": { "@id": "https://fakereasoning.example/#team" }
+      "publisher": { "@id": "https://deepfake-detector-website.vercel.app/#team" }
     },
     {
       "@type": "CreativeWork",
-      "@id": "https://fakereasoning.example/#model",
+      "@id": "https://deepfake-detector-website.vercel.app/#model",
       "name": "Fine-tuned FakeReasoning adapters",
       "description": "LoRA adapters trained on AnnaGao/FakeReasoning: 62,586,880 trainable parameters, 0.799% of the model. Out-of-distribution accuracy across ten unseen generators is 92.5%, unchanged by fine-tuning; class separation rises from +0.274 to +0.520.",
       "isBasedOn": "https://huggingface.co/AnnaGao/FakeReasoning",
-      "creator": { "@id": "https://fakereasoning.example/#team" },
+      "creator": { "@id": "https://deepfake-detector-website.vercel.app/#team" },
       "dateCreated": "2026-08-17",
       "license": "https://huggingface.co/AnnaGao/FakeReasoning"
     }
