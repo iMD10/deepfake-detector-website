@@ -17,8 +17,8 @@
        POST /api/v1/warmup    multipart: model=<id>, 202 and returns at once
        GET  /health           liveness
 
-     One call answers for one checkpoint, so the two-column comparison is two
-     calls in parallel. Model ids come from the backend's model_catalog.py.
+     One call answers for one checkpoint, so the panel makes one call per
+     column it shows. Model ids come from the backend's model_catalog.py.
 
      Set API to "" to go back to demo mode, which replays the verbatim
      2026-08-17 run instead of spending GPU time. Keep that path working. */
@@ -180,6 +180,18 @@
   var ORDER = ["boot", "load", "read", "write"];
   var timers = [];
 
+  /* Which readings the panel shows. Read from the markup rather than fixed
+     here, so hiding an <article class="model"> in index.html is the single
+     switch: no request is made for it, no warmup is spent on it, and nothing
+     is written into it. Remove the hidden attribute and it comes back. */
+  var COLUMNS = Array.prototype.slice
+    .call(document.querySelectorAll(".doc-compare .model[data-model]"))
+    .filter(function (el) { return !el.hidden; })
+    .map(function (el) { return el.dataset.model; });
+
+  function sayId(col) { return col === "official" ? "say-of" : "say-ft"; }
+  function verdictId(col) { return col === "official" ? "v-of" : "v-ft"; }
+
   function stageEl(name) { return stages.querySelector('[data-s="' + name + '"]'); }
 
   function showError(msg) {
@@ -293,8 +305,8 @@
   }
 
   function paintModel(which, data) {
-    var say = document.getElementById(which === "official" ? "say-of" : "say-ft");
-    var verdict = document.getElementById(which === "official" ? "v-of" : "v-ft");
+    var say = document.getElementById(sayId(which));
+    var verdict = document.getElementById(verdictId(which));
     var ms = document.querySelector('.model[data-model="' + which + '"] .ms');
 
     renderProse(say, cleanReasoning(data.reasoning));
@@ -313,8 +325,8 @@
   /* Shown when the backend answered, but not for this model. Better than
      leaving the other column's prose from the previous run standing. */
   function paintMissing(which, reason) {
-    var say = document.getElementById(which === "official" ? "say-of" : "say-ft");
-    var verdict = document.getElementById(which === "official" ? "v-of" : "v-ft");
+    var say = document.getElementById(sayId(which));
+    var verdict = document.getElementById(verdictId(which));
     var ms = document.querySelector('.model[data-model="' + which + '"] .ms');
     var p = document.createElement("p");
     p.textContent = reason || "No answer came back from this model.";
@@ -336,11 +348,11 @@
        own photograph there is no ground truth to state, so it goes. */
     var truth = document.getElementById("exhibit-truth");
     if (truth) truth.hidden = true;
-    ["ft", "of"].forEach(function (k) {
-      var v = document.getElementById("v-" + k);
+    COLUMNS.forEach(function (col) {
+      var v = document.getElementById(verdictId(col));
       v.textContent = "";
       v.classList.remove("real");
-      document.getElementById("say-" + k).textContent = "";
+      document.getElementById(sayId(col)).textContent = "";
     });
   }
 
@@ -438,7 +450,7 @@
      the file picker, which is the bulk of the cold path. */
   function warmup() {
     if (!API) return;
-    ["finetune", "official"].forEach(function (col) {
+    COLUMNS.forEach(function (col) {
       var body = new FormData();
       body.append("model", MODEL_IDS[col]);
       fetch(API + WARMUP, { method: "POST", body: body }).catch(function () {});
@@ -512,7 +524,7 @@
 
   document.getElementById("analyse").addEventListener("click", function () {
     clearError();
-    /* Warm both GPU classes now, not on file select. Choosing a file takes a
+    /* Warm the GPU class now, not on file select. Choosing a file takes a
        visitor several seconds and the containers need about a minute, so this
        is the only moment where the head start is worth anything. It costs a
        boot if they cancel the picker, which is what /warmup is for. */
@@ -550,8 +562,8 @@
       return;
     }
 
-    /* Two calls, one per checkpoint, in parallel. Neither is allowed to sink
-       the other: each settles into {ok, value|error} so one model failing
+    /* One call per visible checkpoint, in parallel. None is allowed to sink
+       another: each settles into {ok, value|error} so one model failing
        still shows the one that answered. */
     var controller = window.AbortController ? new AbortController() : null;
     var timedOut = false;
@@ -566,7 +578,7 @@
                     function (e) { return { ok: false, error: e }; });
     }
 
-    var columns = ["finetune", "official"];
+    var columns = COLUMNS;
 
     Promise.all(columns.map(function (col) {
       return settle(analyseOne(file, MODEL_IDS[col], signal));
@@ -590,7 +602,9 @@
         painted[col] = s.value;
       });
 
-      if (!painted.finetune && !painted.official) {
+      var answered = columns.filter(function (c) { return painted[c]; });
+
+      if (!answered.length) {
         throw firstError || new Error("The backend replied, but with no result this page could read.");
       }
 
@@ -603,7 +617,7 @@
         else paintMissing(col, firstError ? firstError.message : null);
       });
 
-      openDoc(file, (painted.official || painted.finetune).image);
+      openDoc(file, painted[answered[0]].image);
     }).catch(function (e) {
       clearTimeout(timer);
       resetStages();

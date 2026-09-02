@@ -8,7 +8,7 @@
      robots.txt, uses it, so a custom domain is one find-and-replace across
      those three files plus a redirect from the vercel.app name. -->
 <title>Not a score. An argument. — AI image detection</title>
-<meta name="description" content="Upload a photograph and two vision-language models each write what they found in it. 92.5% accuracy on ten unseen generators. KAUST Academy, 2026.">
+<meta name="description" content="Upload a photograph and a vision-language model writes what it found in it. 92.5% accuracy on ten unseen generators. KAUST Academy, 2026.">
 <link rel="canonical" href="https://deepfake-detector-website.vercel.app/">
 <meta name="theme-color" content="#000000">
 
@@ -21,7 +21,7 @@
 <meta property="og:site_name" content="Not a score. An argument.">
 <meta property="og:url" content="https://deepfake-detector-website.vercel.app/">
 <meta property="og:title" content="Not a score. An argument.">
-<meta property="og:description" content="Upload a photograph and two vision-language models each write what they found in it. 92.5% accuracy on ten unseen generators. KAUST Academy, 2026.">
+<meta property="og:description" content="Upload a photograph and a vision-language model writes what it found in it. 92.5% accuracy on ten unseen generators. KAUST Academy, 2026.">
 <meta property="og:image" content="https://deepfake-detector-website.vercel.app/assets/og.png">
 <meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1200">
@@ -30,7 +30,7 @@
 
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Not a score. An argument.">
-<meta name="twitter:description" content="Upload a photograph and two vision-language models each write what they found in it. 92.5% accuracy on ten unseen generators.">
+<meta name="twitter:description" content="Upload a photograph and a vision-language model writes what it found in it. 92.5% accuracy on ten unseen generators.">
 <meta name="twitter:image" content="https://deepfake-detector-website.vercel.app/assets/og.png">
 <meta name="twitter:image:alt" content="Not a score. An argument. — a deepfake detector that answers in prose, from KAUST Academy.">
 
@@ -153,8 +153,8 @@
     </h1>
 
     <p class="subhead anim" style="--d:.28s">
-      A score of 0.83 tells you nothing to check, cite, or appeal. Upload a photograph and two
-      models each write what they found in it.
+      A score of 0.83 tells you nothing to check, cite, or appeal. Upload a photograph and the
+      model writes what it found in it.
     </p>
 
     <div class="cta-wrap anim" style="--d:.4s">
@@ -408,8 +408,6 @@
       <p>Built on <code>AnnaGao/FakeReasoning</code> by PRIS-CV. Our contribution is LoRA adapters
         on their weights, 62.6M parameters, 0.799% of the model — not a model trained from
         scratch. KAUST Academy, August 2026.</p>
-      <p>The fine-tune does not have a public name yet. Until the team settles one, the two
-        options are labelled &ldquo;Our fine-tune&rdquo; and &ldquo;Original (PRIS-CV)&rdquo;.</p>
     </div>
   </footer>
 
@@ -433,7 +431,7 @@
   <div class="doc-inner">
 
     <div class="doc-bar">
-      <h2 id="doc-title">Two readings of one photograph</h2>
+      <h2 id="doc-title">One reading of one photograph</h2>
       <button class="doc-close" id="doc-close" aria-label="Close">&times;</button>
     </div>
 
@@ -445,13 +443,13 @@
           <dt>size</dt><dd>150 &times; 150 &middot; JPEG</dd>
           <dt>run</dt><dd>17 Aug 2026</dd>
         </dl>
-        <p class="truth" id="exhibit-truth">This photograph is AI-generated. The fine-tune says so;
-          the released checkpoint does not.</p>
+        <p class="truth" id="exhibit-truth">This photograph is AI-generated. The model reads it as
+          real, so the note below is wrong about this one.</p>
       </div>
 
       <div class="doc-compare">
 
-        <article class="model" data-model="finetune">
+        <article class="model" data-model="finetune" hidden>
           <header>
             <h3>Our fine-tune</h3>
             <span class="ms">9.9s</span>
@@ -472,7 +470,7 @@
 
         <article class="model" data-model="official">
           <header>
-            <h3>Original <span>(PRIS-CV)</span></h3>
+            <h3>Prediction</h3>
             <span class="ms">15.6s</span>
           </header>
           <div class="say" id="say-of">

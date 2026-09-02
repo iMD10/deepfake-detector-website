@@ -390,6 +390,11 @@ body.menu-open{overflow:hidden}
 }
 
 .doc-compare{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(20px,3vw,32px)}
+/* One reading is hidden in the markup, so the grid would otherwise leave an
+   empty half. Collapse to a single column, and give the remaining article the
+   strong rule the second column gives up below. Unhide it and both come back. */
+.doc-compare:has(> .model[hidden]){grid-template-columns:minmax(0,1fr)}
+.doc-compare:has(> .model[hidden]) .model[data-model="official"] header{border-bottom-color:var(--doc-ink)}
 .model{min-width:0}
 .model header{
   display:flex;align-items:baseline;gap:8px;
