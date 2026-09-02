@@ -492,36 +492,6 @@
     });
   }
 
-  /* ------------------------------------------------------ section nav
-
-     The header scrolls away with the landing, so a compact nav takes over
-     once the document starts, and marks which section is being read. */
-  (function subnav() {
-    var bar = document.getElementById("subnav");
-    var top = document.getElementById("top");
-    var ids = ["method", "results", "team", "paper"];
-    if (!bar || !top || !("IntersectionObserver" in window)) return;
-
-    new IntersectionObserver(function (entries) {
-      bar.classList.toggle("on", !entries[0].isIntersecting);
-    }, { threshold: 0 }).observe(top);
-
-    var links = Array.prototype.slice.call(bar.querySelectorAll("a[href^='#']"));
-    var spy = new IntersectionObserver(function (entries) {
-      entries.forEach(function (e) {
-        if (!e.isIntersecting) return;
-        links.forEach(function (l) {
-          l.classList.toggle("here", l.getAttribute("href") === "#" + e.target.id);
-        });
-      });
-    }, { rootMargin: "-45% 0px -50% 0px" });
-
-    ids.forEach(function (id) {
-      var s = document.getElementById(id);
-      if (s) spy.observe(s);
-    });
-  })();
-
   document.getElementById("analyse").addEventListener("click", function () {
     clearError();
     /* Warm the GPU class now, not on file select. Choosing a file takes a
