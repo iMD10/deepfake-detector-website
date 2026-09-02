@@ -245,6 +245,12 @@
             <h3>Our fine-tune</h3>
             <span class="ms">9.9s</span>
           </header>
+          <div class="verdict" data-v="fake">
+            <span class="v-label">Verdict</span>
+            <p class="v-line"><b id="v-ft">Fake</b><span class="v-note">greedy decoding &middot; reproducible</span></p>
+          </div>
+          <p class="caveat">A fake verdict is the stronger of the two. Measured fake recall is 70.0%
+            against 100.0% real recall, so this model misses fakes more often than it doubts photographs.</p>
           <div class="say" id="say-ft">
             <p>The insect&rsquo;s body structure appears distorted, with an unnatural connection between
             the head and body; the texture of the insect&rsquo;s exoskeleton is inconsistent, showing blurry
@@ -254,9 +260,6 @@
             signs of digital manipulation, with unrealistic reflections and highlights that do not align
             with natural light interactions.</p>
           </div>
-          <p class="verdict"><b id="v-ft">Fake</b><span>greedy decoding &middot; reproducible</span></p>
-          <p class="caveat">A fake verdict is the stronger of the two. Measured fake recall is 70.0%
-            against 100.0% real recall, so this model misses fakes more often than it doubts photographs.</p>
         </article>
 
         <article class="model" data-model="official">
@@ -264,15 +267,18 @@
             <h3>Prediction</h3>
             <span class="ms">15.6s</span>
           </header>
+          <div class="verdict" data-v="real">
+            <span class="v-label">Verdict</span>
+            <p class="v-line"><b id="v-of" class="real">Real</b><span class="v-note">sampled at t=0.2 &middot; wording varies</span></p>
+          </div>
+          <p class="caveat">This model runs with sampling on, the authors' published configuration. Ask it
+            twice about the same photograph and it will find different evidence both times.</p>
           <div class="say" id="say-of">
             <p><em class="half">low-level</em>The texture of the insect and leaves appears natural and
             detailed, consistent with real-world objects. The edges of the insect and leaves are smooth
             and well-defined, typical of a real photograph. The lighting and shadows on the insect and
             surrounding foliage are consistent with a single light source, such as sunlight.</p>
           </div>
-          <p class="verdict"><b id="v-of" class="real">Real</b><span>sampled at t=0.2 &middot; wording varies</span></p>
-          <p class="caveat">This model runs with sampling on, the authors' published configuration. Ask it
-            twice about the same photograph and it will find different evidence both times.</p>
         </article>
 
       </div>
