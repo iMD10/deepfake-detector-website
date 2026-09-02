@@ -413,14 +413,34 @@ body.menu-open{overflow:hidden}
   font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;
   color:var(--doc-muted);margin-bottom:3px;
 }
+/* The classification, stated above the argument instead of under it, and
+   enclosed so it reads as the panel's answer rather than a footnote to the
+   prose. Weight stays epistemic, per the brand deck: a fake verdict is solid
+   and enclosed, a real one dashed and lighter, because measured fake recall
+   is 70.0% against 100.0% real recall. Enclosure and weight carry that, not
+   colour — there is no score here to shade. */
 .verdict{
-  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
-  margin:16px 0 0;padding-top:13px;border-top:1px solid var(--doc-line);
+  margin:0 0 10px;padding:10px 14px;border-radius:3px;
+  background:var(--doc-card);
+  border:1px solid var(--doc-ink);border-left:4px solid var(--doc-ink);
 }
-.verdict b{font-size:19px;font-weight:600;color:var(--doc-ink);letter-spacing:-.015em}
-.verdict b.real{font-weight:400;color:var(--doc-muted)}
-.verdict span{font-size:11px;color:var(--doc-muted)}
-.caveat{margin:9px 0 0;font-size:12px;line-height:1.65;color:var(--doc-muted)}
+.verdict[data-v="real"]{border:1px dashed var(--doc-line);border-left:4px solid var(--doc-muted)}
+/* No answer from this model: an empty slot, never a verdict-shaped one. */
+.verdict[data-v="none"]{border:1px dashed var(--doc-line);border-left:4px solid var(--doc-line)}
+.v-label{
+  display:block;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--doc-muted);margin-bottom:2px;
+}
+/* min-height so the slot keeps its shape while it is empty: the panel opens
+   with no verdict in it and fills once the reasoning lands. */
+.v-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:0;min-height:33px}
+.verdict b{
+  font-size:clamp(23px,2.6vw,28px);font-weight:600;line-height:1.15;
+  color:var(--doc-ink);letter-spacing:-.02em;
+}
+.verdict b.real{font-weight:500;color:var(--doc-body)}
+.v-note{font-size:11px;color:var(--doc-muted)}
+.caveat{margin:0 0 15px;font-size:12px;line-height:1.65;color:var(--doc-muted)}
 .flag{
   margin:18px 0 0;padding:10px 13px;border-radius:4px;
   background:var(--doc-flag-bg);border:1px solid #F0DCA8;

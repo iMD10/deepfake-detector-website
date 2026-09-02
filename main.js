@@ -408,6 +408,13 @@
     });
   }
 
+  /* The verdict word sits inside the enclosed block that states it. Styling
+     hangs off that block, so the word's element is not the one to mark. */
+  function setVerdictState(wordEl, state) {
+    var box = wordEl.closest ? wordEl.closest(".verdict") : null;
+    if (box) box.setAttribute("data-v", state);
+  }
+
   function paintModel(which, data) {
     var say = document.getElementById(sayId(which));
     var verdict = document.getElementById(verdictId(which));
@@ -418,6 +425,9 @@
     var word = data.prediction === "real" ? "Real" : "Fake";
     verdict.textContent = word;
     verdict.classList.toggle("real", data.prediction === "real");
+    /* The enclosing block carries the state: solid for fake, dashed for real.
+       prediction is only ever one of the two, so there is no third branch. */
+    setVerdictState(verdict, data.prediction === "real" ? "real" : "fake");
 
     if (typeof data.inference_ms === "number") {
       ms.textContent = (data.inference_ms / 1000).toFixed(1) + "s";
@@ -438,6 +448,7 @@
     say.appendChild(p);
     verdict.textContent = "—";
     verdict.classList.remove("real");
+    setVerdictState(verdict, "none");
     /* Clear the timing too. A 9.9s next to "no answer" reads as a measurement
        of something that never happened. */
     if (ms) ms.textContent = "";
@@ -456,6 +467,7 @@
       var v = document.getElementById(verdictId(col));
       v.textContent = "";
       v.classList.remove("real");
+      setVerdictState(v, "none");
       document.getElementById(sayId(col)).textContent = "";
     });
   }
