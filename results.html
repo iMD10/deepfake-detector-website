@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Results — Not a score. An argument.</title>
+<meta name="description" content="92.5% on ten unseen generators, class separation from +0.400 to +0.699, and the fake-recall weakness that fine-tuning did not fix.">
+<link rel="canonical" href="https://deepfake-detector-website.vercel.app/results.html">
+<meta name="theme-color" content="#F7F8F8">
+
+<link rel="icon" href="assets/mark.svg" type="image/svg+xml">
+<link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Not a score. An argument.">
+<meta property="og:url" content="https://deepfake-detector-website.vercel.app/results.html">
+<meta property="og:title" content="Results — What it measures">
+<meta property="og:description" content="92.5% on ten unseen generators, class separation from +0.400 to +0.699, and the fake-recall weakness that fine-tuning did not fix.">
+<meta property="og:image" content="https://deepfake-detector-website.vercel.app/assets/og.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Not a score. An argument. — a deepfake detector that answers in prose, from KAUST Academy.">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Results — What it measures">
+<meta name="twitter:description" content="92.5% on ten unseen generators, class separation from +0.400 to +0.699, and the fake-recall weakness that fine-tuning did not fix.">
+<meta name="twitter:image" content="https://deepfake-detector-website.vercel.app/assets/og.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="paper">
+
+<a class="skip" href="#main">Skip to content</a>
+
+<div class="page flat">
+
+  <header class="header">
+    <a class="logo" href="/" aria-label="Home">
+      <img src="assets/logo.webp" width="52" height="52" alt="">
+    </a>
+
+    <nav class="nav-pill" aria-label="Primary">
+      <a href="/">Home</a>
+      <a href="/method.html">Method</a>
+      <a href="/results.html" class="active" aria-current="page">Results</a>
+      <a href="/team.html">Team</a>
+      <a href="/paper.html">Paper</a>
+    </nav>
+
+    <a class="signin" href="assets/kasp_project_report.pdf" target="_blank" rel="noopener">Read the paper</a>
+
+    <button class="burger" id="burger" aria-expanded="false" aria-controls="mobile-menu" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </header>
+
+  <main class="doc-main" id="main">
+    <section class="sec" aria-labelledby="page-h">
+      <div class="sec-in">
+        <h1 id="page-h">Results</h1>
+        <p class="lede">Fine-tuning did not make the model more accurate on unseen generators. It
+          made it separate the two classes further apart, and it corrected genuine photographs
+          without costing anything on the fake ones.</p>
+
+        <div class="fig-wrap">
+          <table class="fig">
+            <thead>
+              <tr><th scope="col">Metric</th><th scope="col">Base</th><th scope="col">Fine-tuned</th></tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">In-distribution accuracy (n=20)</th><td>70.0%</td><td>85.0%</td></tr>
+              <tr><th scope="row">Class separation</th><td>+0.400</td><td>+0.699</td></tr>
+              <tr><th scope="row">Recall, real</th><td>70.0%</td><td>100.0%</td></tr>
+              <tr><th scope="row">Recall, fake</th><td>70.0%</td><td>70.0%</td></tr>
+              <tr><th scope="row">Out-of-distribution accuracy, 10 unseen generators</th><td>92.5%</td><td>92.5%</td></tr>
+              <tr><th scope="row">Explanation diversity, out-of-distribution</th><td>100%</td><td>100%</td></tr>
+              <tr><th scope="row">Largest duplicate cluster</th><td>1</td><td>1</td></tr>
+            </tbody>
+            <caption>In-distribution is 20 held-out FakeClue images, balanced 10 real and 10 fake:
+              14/20 correct before, 17/20 after. Out-of-distribution is 40 images, four from each of
+              ten generators the adaptation data never contained.</caption>
+          </table>
+        </div>
+
+        <h2>Per generator, four images each</h2>
+        <div class="fig-wrap">
+          <table class="fig">
+            <thead>
+              <tr><th scope="col">Generator</th><th scope="col">Base</th><th scope="col">Fine-tuned</th></tr>
+            </thead>
+            <tbody>
+              <tr><th scope="row">DALL&middot;E 3</th><td>100%</td><td>100%</td></tr>
+              <tr><th scope="row">DeepFloyd IF</th><td>100%</td><td>100%</td></tr>
+              <tr><th scope="row">Flux</th><td>100%</td><td>75%</td></tr>
+              <tr><th scope="row">GigaGAN</th><td>100%</td><td>100%</td></tr>
+              <tr><th scope="row">GPT-4o</th><td>100%</td><td>100%</td></tr>
+              <tr><th scope="row">Kandinsky</th><td>100%</td><td>75%</td></tr>
+              <tr><th scope="row">Midjourney</th><td>75%</td><td>75%</td></tr>
+              <tr><th scope="row">PixArt</th><td>100%</td><td>100%</td></tr>
+              <tr><th scope="row">Stable Diffusion</th><td>75%</td><td>100%</td></tr>
+              <tr><th scope="row">StyleGAN-XL</th><td>75%</td><td>100%</td></tr>
+            </tbody>
+            <caption>Four movements of 25 points each, netting to zero. Two generators lost a single
+              image and two gained one, which is what an unchanged 92.5% mean is made of.</caption>
+          </table>
+        </div>
+
+        <p class="note warn"><b>The weakness stays on the page.</b> Fine-tuning did not improve fake
+          recall at all: it is 70.0% before and 70.0% after, so the model still misses about three
+          fakes in every ten. The whole gain came from correcting genuine photographs, where recall
+          went from 70.0% to 100.0%. A fake verdict from the fine-tune is therefore stronger evidence
+          than a real one.</p>
+
+        <p class="note"><b>On quoting these numbers.</b> The accuracy point estimates come from small
+          samples and should not be quoted without that caveat. At n=20 in-distribution, one image is
+          five percentage points, and the whole +15-point gain is three additional correct
+          predictions; each per-generator cell is four images, so one image is 25 points. The
+          fine-tuned checkpoint comes from a single training run with no seed variance, and the
+          in-distribution explanation-diversity diagnostics were not recomputed on this subset.</p>
+      </div>
+    </section>
+
+    <nav class="pager" aria-label="More sections">
+      <a class="prev" href="/method.html"><span>Previous</span><b>Method</b></a>
+      <a class="next" href="/team.html"><span>Next</span><b>Team</b></a>
+    </nav>
+  </main>
+
+  <footer class="sec flow-foot">
+    <div class="sec-in">
+      <p>Built on <code>AnnaGao/FakeReasoning</code> by PRIS-CV. Our contribution is LoRA adapters on their weights, 62.6M parameters, 0.799% of the model &mdash; not a model trained from scratch. KAUST Academy, August 2026.</p>
+    </div>
+  </footer>
+
+</div>
+
+<div class="overlay" id="overlay" hidden></div>
+
+<div class="sheet" id="mobile-menu" hidden>
+  <nav aria-label="Mobile">
+    <a href="/">Home</a>
+    <a href="/method.html">Method</a>
+    <a href="/results.html" class="active" aria-current="page">Results</a>
+    <a href="/team.html">Team</a>
+    <a href="/paper.html">Paper</a>
+    <a href="assets/kasp_project_report.pdf" class="sheet-cta" target="_blank" rel="noopener">Read the paper</a>
+  </nav>
+</div>
+
+<script src="nav.js"></script>
+</body>
+</html>

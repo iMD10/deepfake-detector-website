@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Paper — Not a score. An argument.</title>
+<meta name="description" content="Deepfake and AI-Generated Image Detection with Visual Explanation using Vision-Language Models. KAUST Academy, August 2026.">
+<link rel="canonical" href="https://deepfake-detector-website.vercel.app/paper.html">
+<meta name="theme-color" content="#F7F8F8">
+
+<link rel="icon" href="assets/mark.svg" type="image/svg+xml">
+<link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Not a score. An argument.">
+<meta property="og:url" content="https://deepfake-detector-website.vercel.app/paper.html">
+<meta property="og:title" content="Paper — The report">
+<meta property="og:description" content="Deepfake and AI-Generated Image Detection with Visual Explanation using Vision-Language Models. KAUST Academy, August 2026.">
+<meta property="og:image" content="https://deepfake-detector-website.vercel.app/assets/og.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Not a score. An argument. — a deepfake detector that answers in prose, from KAUST Academy.">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Paper — The report">
+<meta name="twitter:description" content="Deepfake and AI-Generated Image Detection with Visual Explanation using Vision-Language Models. KAUST Academy, August 2026.">
+<meta name="twitter:image" content="https://deepfake-detector-website.vercel.app/assets/og.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body class="paper">
+
+<a class="skip" href="#main">Skip to content</a>
+
+<div class="page flat">
+
+  <header class="header">
+    <a class="logo" href="/" aria-label="Home">
+      <img src="assets/logo.webp" width="52" height="52" alt="">
+    </a>
+
+    <nav class="nav-pill" aria-label="Primary">
+      <a href="/">Home</a>
+      <a href="/method.html">Method</a>
+      <a href="/results.html">Results</a>
+      <a href="/team.html">Team</a>
+      <a href="/paper.html" class="active" aria-current="page">Paper</a>
+    </nav>
+
+    <a class="signin" href="assets/kasp_project_report.pdf" target="_blank" rel="noopener">Read the paper</a>
+
+    <button class="burger" id="burger" aria-expanded="false" aria-controls="mobile-menu" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </header>
+
+  <main class="doc-main" id="main">
+    <section class="sec" aria-labelledby="page-h">
+      <div class="sec-in">
+        <h1 id="page-h">Paper</h1>
+        <p class="lede">A KAUST Academy report dated 17 August 2026. Every figure on this site is
+          taken from it.</p>
+
+        <p class="note"><b>Deepfake &amp; AI-Generated Image Detection with Visual Explanation using
+          Vision&ndash;Language Models.</b> Abdulqader Alfawzan, Ahmed Sayegh, Muhannad Alfwazan,
+          Marwan Alayed, Ziyad Alghamdi and Salman Khan. KAUST Academy, August 2026.<br>
+          <a href="assets/kasp_project_report.pdf">Read the report (PDF, 2.9&nbsp;MB)</a></p>
+
+        <h2>What it reports</h2>
+        <ul>
+          <li>Class separation nearly doubled, <b>+0.400 to +0.699</b> — the distance between
+            the class-conditional means, which moves whether or not a prediction crosses a threshold.</li>
+          <li>Out-of-distribution accuracy across ten unseen generators held at <b>92.5%</b>,
+            unchanged by fine-tuning, and every one of the forty explanations was unique.</li>
+          <li>In-distribution accuracy rose <b>70.0% to 85.0%</b>, entirely by fixing real
+            photographs: real recall 70.0% to 100.0%, fake recall unchanged at 70.0%.</li>
+          <li>Reading the probability at the verdict token rather than the greedy word put the best
+            operating point at <b>t = 0.98</b>, not the 0.50 a naive reading assumes.</li>
+          <li>Trainable parameters <b>62,586,880</b>, 0.799% of the model, with both vision towers
+            and the fusion stack frozen and verified bit-identical.</li>
+        </ul>
+
+        <h2>Base checkpoint</h2>
+        <p>Built on <code>AnnaGao/FakeReasoning</code> by PRIS-CV. The team's contribution is the
+          LoRA adapters described above, applied to their released weights.</p>
+      </div>
+    </section>
+
+    <nav class="pager" aria-label="More sections">
+      <a class="prev" href="/team.html"><span>Previous</span><b>Team</b></a>
+    </nav>
+  </main>
+
+  <footer class="sec flow-foot">
+    <div class="sec-in">
+      <p>Built on <code>AnnaGao/FakeReasoning</code> by PRIS-CV. Our contribution is LoRA adapters on their weights, 62.6M parameters, 0.799% of the model &mdash; not a model trained from scratch. KAUST Academy, August 2026.</p>
+    </div>
+  </footer>
+
+</div>
+
+<div class="overlay" id="overlay" hidden></div>
+
+<div class="sheet" id="mobile-menu" hidden>
+  <nav aria-label="Mobile">
+    <a href="/">Home</a>
+    <a href="/method.html">Method</a>
+    <a href="/results.html">Results</a>
+    <a href="/team.html">Team</a>
+    <a href="/paper.html" class="active" aria-current="page">Paper</a>
+    <a href="assets/kasp_project_report.pdf" class="sheet-cta" target="_blank" rel="noopener">Read the paper</a>
+  </nav>
+</div>
+
+<script src="nav.js"></script>
+</body>
+</html>
