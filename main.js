@@ -177,6 +177,10 @@
   var doc = document.getElementById("doc");
 
   var MAX_BYTES = 12 * 1024 * 1024;
+  /* An MPO holds the primary image plus one or two more frames, so the file on
+     disk is larger than the image that ends up being sent. Read up to twice
+     the cap and apply the cap to what prepare() returns. */
+  var READ_MAX = 2 * MAX_BYTES;
   var ORDER = ["boot", "load", "read", "write"];
   var timers = [];
 
@@ -191,6 +195,106 @@
 
   function sayId(col) { return col === "official" ? "say-of" : "say-ft"; }
   function verdictId(col) { return col === "official" ? "v-of" : "v-ft"; }
+
+  /* ------------------------------------------------- what actually gets sent
+
+     The file's declared type cannot be trusted. A camera or a phone in depth
+     mode writes .mpo, and the browser reports it as "image/mpo" on one
+     platform and "" on the next, so a MIME test rejected the photograph
+     before it ever reached the backend. Read the magic number instead. */
+  function sniff(b) {
+    if (b.length > 3 && b[0] === 0xFF && b[1] === 0xD8 && b[2] === 0xFF) return "image/jpeg";
+    if (b.length > 8 && b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4E && b[3] === 0x47 &&
+        b[4] === 0x0D && b[5] === 0x0A && b[6] === 0x1A && b[7] === 0x0A) return "image/png";
+    if (b.length > 12 && b[0] === 0x52 && b[1] === 0x49 && b[2] === 0x46 && b[3] === 0x46 &&
+        b[8] === 0x57 && b[9] === 0x45 && b[10] === 0x42 && b[11] === 0x50) return "image/webp";
+    return null;
+  }
+
+  /* An MPO is two or more complete JPEG images written end to end: the
+     full-size primary first, then the parallax or preview frames recorded
+     alongside it. Every byte of the first image is already a valid JPEG, so
+     the whole repair is to send that and drop the rest — nothing is decoded
+     and nothing is re-encoded, so the photograph the model reads is the
+     photograph the camera wrote.
+
+     Returns the length of the primary image, or 0 if these bytes are not a
+     JPEG. This walks the marker structure rather than searching for the FFD9
+     end marker, because FFD9 also ends the EXIF thumbnail inside APP1 and a
+     search would cut the photograph off there. */
+  function primaryJpegLength(b) {
+    if (b.length < 4 || b[0] !== 0xFF || b[1] !== 0xD8) return 0;
+    var i = 2;
+    while (i + 1 < b.length) {
+      if (b[i] !== 0xFF) return 0;                     /* lost the structure */
+      var m = b[i + 1];
+      if (m === 0xFF) { i++; continue; }               /* fill byte */
+      if (m === 0xD9) return i + 2;                    /* EOI: primary ends */
+      if (m === 0x01 || (m >= 0xD0 && m <= 0xD7)) { i += 2; continue; }
+      if (i + 3 >= b.length) return 0;
+      var len = (b[i + 2] << 8) | b[i + 3];
+      if (len < 2) return 0;
+      i += 2 + len;
+      if (m === 0xDA) {
+        /* Entropy-coded scan data. An FF inside it is stuffed as FF 00, and
+           restart markers are legal; anything else is the next real marker. */
+        while (i + 1 < b.length &&
+               !(b[i] === 0xFF && b[i + 1] !== 0x00 &&
+                 !(b[i + 1] >= 0xD0 && b[i + 1] <= 0xD7))) i++;
+      }
+    }
+    return 0;
+  }
+
+  /* APP2 "MPF\0" is the multi-picture index: the table of contents naming
+     where each frame starts. With the other frames dropped its offsets point
+     at nothing, and a reader that trusts it still calls the result an MPO, so
+     it goes too. Returns its byte range, or null. Only the header is walked —
+     APP2 always precedes the first scan. EXIF in APP1 is left alone, so
+     orientation and capture data survive the cut. */
+  function mpfSegment(b) {
+    var i = 2;
+    while (i + 7 < b.length && b[i] === 0xFF) {
+      var m = b[i + 1];
+      if (m === 0xDA || m === 0xD9) return null;
+      if (m === 0x01 || (m >= 0xD0 && m <= 0xD7)) { i += 2; continue; }
+      var len = (b[i + 2] << 8) | b[i + 3];
+      if (len < 2) return null;
+      if (m === 0xE2 && b[i + 4] === 0x4D && b[i + 5] === 0x50 &&
+          b[i + 6] === 0x46 && b[i + 7] === 0x00) return [i, i + 2 + len];
+      i += 2 + len;
+    }
+    return null;
+  }
+
+  /* Resolves to {file, note}: the bytes to upload, and a line for the exhibit
+     when they are not the bytes that were picked. */
+  function prepare(file) {
+    return file.arrayBuffer().then(function (buf) {
+      var b = new Uint8Array(buf);
+      var type = sniff(b);
+
+      if (!type) {
+        throw new Error("That file is not a PNG, JPEG or WebP image. " +
+          "It does not begin like one, whatever its name says.");
+      }
+      if (type !== "image/jpeg") return { file: file, note: null };
+
+      var end = primaryJpegLength(b);
+      if (!end || end >= file.size) return { file: file, note: null };
+
+      /* More frames follow the first: an MPO, or a JPEG with data appended. */
+      var mpf = mpfSegment(b);
+      var parts = mpf ? [file.slice(0, mpf[0]), file.slice(mpf[1], end)]
+                      : [file.slice(0, end)];
+      return {
+        file: new File(parts, file.name.replace(/\.[^.]*$/, "") + ".jpg",
+                       { type: "image/jpeg" }),
+        note: "That was a multi-picture file. Its primary image was lifted out and " +
+              "sent on its own — no pixel was decoded or re-encoded on the way."
+      };
+    });
+  }
 
   function stageEl(name) { return stages.querySelector('[data-s="' + name + '"]'); }
 
@@ -360,9 +464,9 @@
      labels the size row, and replace the filename <dd> with the literal
      string "file". Address the <dd> elements directly. Anything not known —
      demo mode has no response — is left as the markup had it. */
-  function setMeta(file, image) {
+  function setMeta(name, image) {
     var dds = document.getElementById("doc-meta").getElementsByTagName("dd");
-    if (file && dds[0]) dds[0].textContent = file.name;
+    if (name && dds[0]) dds[0].textContent = name;
     if (image && image.width && dds[1]) {
       dds[1].textContent = image.width + " × " + image.height +
         (image.format ? " · " + image.format : "");
@@ -373,17 +477,29 @@
     }
   }
 
+  function setNote(text) {
+    var el = document.getElementById("exhibit-note");
+    if (!el) return;
+    el.textContent = text || "";
+    el.hidden = !text;
+  }
+
   var exhibitUrl = null;
 
-  function openDoc(file, image) {
+  /* `file` is previewed, `name` is captioned. They come apart for a
+     multi-picture file: the preview is the primary image cut out of it, which
+     every browser can decode, while the caption stays the name that was
+     picked. */
+  function openDoc(file, image, note, name) {
     if (file) {
+      setNote(note);
       var img = document.getElementById("doc-img");
       if (exhibitUrl) URL.revokeObjectURL(exhibitUrl);
       exhibitUrl = URL.createObjectURL(file);
       img.src = exhibitUrl;
       img.hidden = false;
       document.getElementById("doc-ph").hidden = true;
-      setMeta(file, image);
+      setMeta(name || file.name, image);
     }
     doc.hidden = false;
     document.body.classList.add("doc-open");
@@ -507,28 +623,40 @@
   });
 
   fileInput.addEventListener("change", function () {
-    var file = fileInput.files && fileInput.files[0];
+    var picked = fileInput.files && fileInput.files[0];
     /* Clear it immediately, or picking the same file twice fires no change
        event and the second attempt looks like a dead button. */
     fileInput.value = "";
-    if (!file) return;
+    if (!picked) return;
 
-    if (!/^image\/(png|jpeg|webp)$/.test(file.type)) {
-      showError("That file is not a PNG, JPEG or WebP image.");
-      return;
-    }
-    if (file.size > MAX_BYTES) {
-      showError("That image is over 12 MB. Try a smaller one.");
+    if (picked.size > READ_MAX) {
+      showError("That file is over " + (READ_MAX / 1048576) + " MB. Try a smaller one.");
       return;
     }
 
     clearError();
+    /* Read and check the bytes before showing the working state: a file that
+       is never going to be sent should not put a stage clock on screen. */
+    prepare(picked).then(function (ready) {
+      if (ready.file.size > MAX_BYTES) {
+        throw new Error("That image is over 12 MB. Try a smaller one.");
+      }
+      analyse(ready.file, picked, ready.note);
+    }, function (e) {
+      showError(e.message);
+    });
+  });
+
+  /* `sending` is what goes to the backend, `picked` is what the visitor chose.
+     They differ only for a multi-picture file, where the caption keeps the
+     name that was picked. */
+  function analyse(sending, picked, note) {
     var stop = runStages();
 
     if (!API) {
       /* Demo mode: hold the wait so the state can be reviewed, then show the
          verbatim run. Set API above to call the real backend. */
-      setTimeout(function () { stop(); openDoc(file, null); }, REDUCED ? 400 : 6000);
+      setTimeout(function () { stop(); openDoc(sending, null, note, picked.name); }, REDUCED ? 400 : 6000);
       return;
     }
 
@@ -551,7 +679,7 @@
     var columns = COLUMNS;
 
     Promise.all(columns.map(function (col) {
-      return settle(analyseOne(file, MODEL_IDS[col], signal));
+      return settle(analyseOne(sending, MODEL_IDS[col], signal));
     })).then(function (settled) {
       clearTimeout(timer);
 
@@ -587,13 +715,13 @@
         else paintMissing(col, firstError ? firstError.message : null);
       });
 
-      openDoc(file, painted[answered[0]].image);
+      openDoc(sending, painted[answered[0]].image, note, picked.name);
     }).catch(function (e) {
       clearTimeout(timer);
       resetStages();
       if (e.requestId) console.error("Backend request id:", e.requestId);
       showError(e.message + (e.config ? "" : RETRY_HINT));
     });
-  });
+  }
 
 })();

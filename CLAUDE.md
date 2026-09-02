@@ -78,6 +78,16 @@ Both classes scale to zero after 300s idle (`FR_IDLE_TIMEOUT=300`), so the backe
 
 The waiting state must hold for two minutes without looking broken. It names the real stages — container start, 26.8 GB of weights resident, towers reading the image, decoder writing — with a real elapsed clock. This is the site's signature element. Do not replace it with a spinner or a fake percentage.
 
+## What the upload accepts
+
+The type the browser reports is not trusted. A camera or a phone in depth mode writes `.mpo`, and the browser calls it `image/mpo` on one platform and `""` on the next, so a MIME test rejected those photographs before they reached the backend. `main.js` reads the magic number instead — JPEG, PNG or WebP — and rejects anything else with a message that says the bytes, not the name, were wrong.
+
+An MPO is two or more complete JPEG images written end to end: the full-size primary first, then the parallax or preview frames. `prepare()` walks the JPEG marker structure to the primary image's EOI, drops the APP2 `MPF\0` index that pointed at the frames now gone, and sends what is left. No pixel is decoded or re-encoded, EXIF in APP1 survives, and a plain JPEG comes through byte-identical. The exhibit says so under the file name when it happens.
+
+Do not replace the marker walk with a search for `FFD9`. That byte pair also ends the EXIF thumbnail inside APP1, and a search cuts the photograph off there — on a measured fixture, 8,301 bytes instead of 221,497.
+
+The size cap is on what gets sent, not on what was picked: an MPO on disk is larger than the image inside it.
+
 ## Attribution — required, not optional
 
 The site credits PRIS-CV and the base checkpoint `AnnaGao/FakeReasoning`. The team's contribution is LoRA adapters on those weights, 62.6M parameters, 0.799% of the model — not a model trained from scratch. This appears in the footer of every page including the 404.

@@ -161,7 +161,7 @@
       <button class="cta" id="analyse">Upload an image</button>
       <button class="cta-alt" id="example">See a worked example</button>
       <span class="cta-note">takes up to a minute</span>
-      <input type="file" id="file" accept="image/png,image/jpeg,image/webp" hidden>
+      <input type="file" id="file" accept="image/png,image/jpeg,image/webp,image/mpo,.mpo" hidden>
       <p class="cta-error" id="err" role="alert" hidden></p>
     </div>
 
@@ -235,6 +235,7 @@
         </dl>
         <p class="truth" id="exhibit-truth">This photograph is AI-generated. The model reads it as
           real, so the note below is wrong about this one.</p>
+        <p class="truth" id="exhibit-note" hidden></p>
       </div>
 
       <div class="doc-compare">
